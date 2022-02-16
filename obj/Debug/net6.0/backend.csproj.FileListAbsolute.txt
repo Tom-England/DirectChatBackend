@@ -1,0 +1,15 @@
+/home/tom/dissertation/DirectChat/backend/bin/Debug/net6.0/backend
+/home/tom/dissertation/DirectChat/backend/bin/Debug/net6.0/backend.deps.json
+/home/tom/dissertation/DirectChat/backend/bin/Debug/net6.0/backend.runtimeconfig.json
+/home/tom/dissertation/DirectChat/backend/bin/Debug/net6.0/backend.dll
+/home/tom/dissertation/DirectChat/backend/bin/Debug/net6.0/ref/backend.dll
+/home/tom/dissertation/DirectChat/backend/bin/Debug/net6.0/backend.pdb
+/home/tom/dissertation/DirectChat/backend/obj/Debug/net6.0/backend.csproj.AssemblyReference.cache
+/home/tom/dissertation/DirectChat/backend/obj/Debug/net6.0/backend.GeneratedMSBuildEditorConfig.editorconfig
+/home/tom/dissertation/DirectChat/backend/obj/Debug/net6.0/backend.AssemblyInfoInputs.cache
+/home/tom/dissertation/DirectChat/backend/obj/Debug/net6.0/backend.AssemblyInfo.cs
+/home/tom/dissertation/DirectChat/backend/obj/Debug/net6.0/backend.csproj.CoreCompileInputs.cache
+/home/tom/dissertation/DirectChat/backend/obj/Debug/net6.0/backend.dll
+/home/tom/dissertation/DirectChat/backend/obj/Debug/net6.0/ref/backend.dll
+/home/tom/dissertation/DirectChat/backend/obj/Debug/net6.0/backend.pdb
+/home/tom/dissertation/DirectChat/backend/obj/Debug/net6.0/backend.genruntimeconfig.cache
