@@ -33,7 +33,8 @@ namespace Network{
                     sender.RemoteEndPoint.ToString());
 
                 // Encode the data string into a byte array.
-                byte[] msg = Encoding.ASCII.GetBytes("This is a test<EOF>");
+                string msg_s = Console.ReadLine();
+                byte[] msg = Encoding.ASCII.GetBytes(msg_s);
 
                 // Send the data through the socket.
                 int bytesSent = sender.Send(msg);
