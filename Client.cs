@@ -1,72 +1,63 @@
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
 namespace Network{
     class Client{
-        public void SendMessage(string message)
-    {
-        byte[] bytes = new byte[1024];
-
-        try
+        public void Connect(String server, String message)
         {
-            // Connect to a Remote server
-            // Get Host IP Address that is used to establish a connection
-            // In this case, we get one IP address of localhost that is IP : 127.0.0.1
-            // If a host has multiple addresses, you will get a list of addresses
-            IPHostEntry host = Dns.GetHostEntry("localhost");
-            IPAddress ipAddress = host.AddressList[0];
-            //IPAddress ipAddress = IPAddress.Parse("90.219.214.223");
-            IPEndPoint remoteEP = new IPEndPoint(ipAddress, 11000);
-
-            // Create a TCP/IP  socket.
-            Socket sender = new Socket(ipAddress.AddressFamily,
-                SocketType.Stream, ProtocolType.Tcp);
-
-            // Connect the socket to the remote endpoint. Catch any errors.
             try
             {
-                // Connect to Remote EndPoint
-                sender.Connect(remoteEP);
+                // Create a TcpClient.
+                // Note, for this client to work you need to have a TcpServer
+                // connected to the same address as specified by the server, port
+                // combination.
+                Int32 port = 13000;
+                TcpClient client = new TcpClient(server, port);
 
-                Console.WriteLine("Socket connected to {0}",
-                    sender.RemoteEndPoint.ToString());
+                // Translate the passed message into ASCII and store it as a Byte array.
+                Byte[] data = System.Text.Encoding.ASCII.GetBytes(message);
 
-                // Encode the data string into a byte array.
-                byte[] msg = Encoding.ASCII.GetBytes(message);
+                // Get a client stream for reading and writing.
+                //  Stream stream = client.GetStream();
 
-                // Send the data through the socket.
-                int bytesSent = sender.Send(msg);
+                NetworkStream stream = client.GetStream();
 
-                // Receive the response from the remote device.
-                int bytesRec = sender.Receive(bytes);
-                Console.WriteLine("Echoed test = {0}",
-                    Encoding.ASCII.GetString(bytes, 0, bytesRec));
+                // Send the message to the connected TcpServer.
+                stream.Write(data, 0, data.Length);
 
-                // Release the socket.
-                sender.Shutdown(SocketShutdown.Both);
-                sender.Close();
+                Console.WriteLine("Sent: {0}", message);
 
+                // Receive the TcpServer.response.
+
+                // Buffer to store the response bytes.
+                data = new Byte[Constants.MESSAGE_SIZE];
+
+                // String to store the response ASCII representation.
+                String responseData = String.Empty;
+
+                // Read the first batch of the TcpServer response bytes.
+                Int32 bytes = stream.Read(data, 0, data.Length);
+                responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
+                Console.WriteLine("Received: {0}", responseData);
+
+                // Close everything.
+                stream.Close();
+                client.Close();
             }
-            catch (ArgumentNullException ane)
+            catch (ArgumentNullException e)
             {
-                Console.WriteLine("ArgumentNullException : {0}", ane.ToString());
+                Console.WriteLine("ArgumentNullException: {0}", e);
             }
-            catch (SocketException se)
+            catch (SocketException e)
             {
-                Console.WriteLine("SocketException : {0}", se.ToString());
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Unexpected exception : {0}", e.ToString());
+                Console.WriteLine("SocketException: {0}", e);
             }
 
+            //Console.WriteLine("\n Press Enter to continue...");
+            //Console.Read();
         }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.ToString());
-        }
-    }
     }
 }

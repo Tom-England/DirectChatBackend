@@ -5,55 +5,75 @@ using System.Text;
 
 namespace Network{
     class Listener{
-        public void start_server(){
-            // Get host IP address
-            // (localhost here)
-            IPHostEntry host = Dns.GetHostEntry("localhost");
-            IPAddress ipAddr = host.AddressList[0];
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddr, 11000);
-        
-            try {
-                Socket listener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+        public void start()
+        {
+            TcpListener server=null;
+            try
+            {
+                // Set the TcpListener on port 13000.
+                Int32 port = 13000;
+                IPAddress localAddr = IPAddress.Parse("127.0.0.1");
 
-                listener.Bind(localEndPoint);
+                // TcpListener server = new TcpListener(port);
+                server = new TcpListener(localAddr, port);
 
-                listener.Listen(10);
+                // Start listening for client requests.
+                server.Start();
 
-                Console.WriteLine("Awaiting Connection");
+                // Buffer for reading data
+                Byte[] bytes = new Byte[Constants.MESSAGE_SIZE - 1];
+                String data = null;
 
-                
+                // Enter the listening loop.
+                while(true)
+                {
+                    Console.Write("Waiting for a connection... ");
 
-                while(true){
-                    Socket handler = listener.Accept();
-                    string data = null;
-                    byte[] bytes = null;
-                    bytes = new byte[Constants.MESSAGE_SIZE];
-                    int bytesRec = handler.Receive(bytes);
-                    data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                    Console.WriteLine("Text Recieved: {0}", data);
-                    byte[] msg = Encoding.ASCII.GetBytes(data);
-                    
-                    handler.Send(msg);
-                    handler.Shutdown(SocketShutdown.Both);
-                    handler.Close();
-                    if (data.IndexOf("<EOF>") > -1){
-                        break;
+                    // Perform a blocking call to accept requests.
+                    // You could also use server.AcceptSocket() here.
+                    TcpClient client = server.AcceptTcpClient();
+                    Console.WriteLine("Connected!");
+
+                    data = null;
+
+                    // Get a stream object for reading and writing
+                    NetworkStream stream = client.GetStream();
+
+                    int i;
+
+                    // Loop to receive all the data sent by the client.
+                    while((i = stream.Read(bytes, 0, bytes.Length))!=0)
+                    {
+                    // Translate data bytes to a ASCII string.
+                    data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+                    Console.WriteLine("Received: {0}", data);
+
+                    // Process the data sent by the client.
+                    data = data.ToUpper();
+
+                    byte[] msg = System.Text.Encoding.ASCII.GetBytes(Constants.ACK);
+
+                    // Send back a response.
+                    stream.Write(msg, 0, msg.Length);
+                    Console.WriteLine("Sent: {0}", Constants.ACK);
                     }
-                }
 
-                //Console.WriteLine("Text Recieved: {0}", data);
-
-                //byte[] msg = Encoding.ASCII.GetBytes(data);
-                //handler.Send(msg);
-                
-
+                    // Shutdown and end connection
+                    client.Close();
             }
-            catch (Exception e){
-                Console.WriteLine(e.ToString());
+            }
+            catch(SocketException e)
+            {
+                Console.WriteLine("SocketException: {0}", e);
+            }
+            finally
+            {
+                // Stop listening for new clients.
+                server.Stop();
             }
 
-            Console.WriteLine("\n Press any key...");
-            Console.ReadKey();
+            Console.WriteLine("\nHit enter to continue...");
+            Console.Read();
         }
     }
 }
