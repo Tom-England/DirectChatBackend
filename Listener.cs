@@ -5,8 +5,6 @@ using System.Text;
 
 namespace Network{
     class Listener{
-
-        public const uint MESSAGE_SIZE = 160; // Default SMS message size of 160 characters
         public void start_server(){
             // Get host IP address
             // (localhost here)
@@ -29,7 +27,7 @@ namespace Network{
                     Socket handler = listener.Accept();
                     string data = null;
                     byte[] bytes = null;
-                    bytes = new byte[MESSAGE_SIZE];
+                    bytes = new byte[Constants.MESSAGE_SIZE];
                     int bytesRec = handler.Receive(bytes);
                     data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
                     Console.WriteLine("Text Recieved: {0}", data);

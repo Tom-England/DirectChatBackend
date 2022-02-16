@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Network{
     class Client{
-        public void StartClient()
+        public void SendMessage(string message)
     {
         byte[] bytes = new byte[1024];
 
@@ -17,6 +17,7 @@ namespace Network{
             // If a host has multiple addresses, you will get a list of addresses
             IPHostEntry host = Dns.GetHostEntry("localhost");
             IPAddress ipAddress = host.AddressList[0];
+            //IPAddress ipAddress = IPAddress.Parse("90.219.214.223");
             IPEndPoint remoteEP = new IPEndPoint(ipAddress, 11000);
 
             // Create a TCP/IP  socket.
@@ -33,8 +34,7 @@ namespace Network{
                     sender.RemoteEndPoint.ToString());
 
                 // Encode the data string into a byte array.
-                string msg_s = Console.ReadLine();
-                byte[] msg = Encoding.ASCII.GetBytes(msg_s);
+                byte[] msg = Encoding.ASCII.GetBytes(message);
 
                 // Send the data through the socket.
                 int bytesSent = sender.Send(msg);
