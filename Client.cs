@@ -6,16 +6,9 @@ using System.Text;
 
 namespace Network{
     class Client{
-
-        Message create_message(String text){
-            Message m = new Message();
-            m.text = text;
-            return m;
-        }
-
         public void Connect(String server, String message)
         {
-            Message m = create_message(message);
+            Message m = new Message(message, server);
             MessageHandler mh = new MessageHandler();
             try
             {
@@ -26,7 +19,6 @@ namespace Network{
                 Int32 port = Constants.PORT;
                 TcpClient client = new TcpClient(server, port);
 
-                m.destination = server;
                 Console.WriteLine(server.Length);
 
                 // Translate the passed message into ASCII and store it as a Byte array.

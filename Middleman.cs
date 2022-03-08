@@ -12,10 +12,11 @@ namespace Network{
         }
         public void listen(){
             listener.create_server();
-            message_stack.Add(listener.get_message());
-            message_stack.Add(listener.get_message());
-            message_stack.Add(listener.get_message());
-            message_stack.Add(listener.get_message());
+            bool running = true;
+            while (running) {
+                message_stack.Add(listener.get_message());
+                
+            }
 
             foreach (Message m in message_stack){
                 Console.WriteLine(m.text);
