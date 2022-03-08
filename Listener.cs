@@ -25,9 +25,21 @@ namespace Network{
             
         }
 
-        public Message get_message(){
+        public void stop_server(){
+            server.Stop();
+        }
+
+        public TcpClient get_client(){
             // Start listening for client requests.
             server.Start();
+            while (true){
+                TcpClient client = server.AcceptTcpClient();
+                return client;
+            }
+        }
+
+        public Message get_message(TcpClient client){
+            
 
             MessageHandler mh = new MessageHandler();
 
@@ -38,9 +50,6 @@ namespace Network{
             // Enter the listening loop.
             while(true)
             {
-                // Perform a blocking call to accept requests.
-                // You could also use server.AcceptSocket() here.
-                TcpClient client = server.AcceptTcpClient();
 
                 // Get a stream object for reading and writing
                 NetworkStream stream = client.GetStream();
@@ -62,8 +71,7 @@ namespace Network{
                 data = mh.from_bytes(bytes);
                 //Console.WriteLine(data.text);
                 // Shutdown and end connection
-                client.Close();
-                server.Stop();
+                
                 return data;
             }
         }
