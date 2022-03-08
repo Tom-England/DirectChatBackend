@@ -30,18 +30,19 @@ namespace Network{
                 Client c = new Client();
                 if (split){
                     foreach(string str in msg_segments){
-                        c.Connect("127.0.0.1", str);
-                        Console.WriteLine(str);
-                        Console.WriteLine("-----------");
+                        c.Connect(Constants.IP, str);
+                        //c.Connect("90.219.214.223", str);
+                        //Console.WriteLine(str);
+                        //Console.WriteLine("-----------");
                     }
                 } else {
                     //Client c = new Client();
-                    c.Connect("127.0.0.1", msg);
+                    c.Connect(Constants.IP, msg);
                 }
                 
             } else if (args[0] == "server"){
-                Listener my_listener = new Listener();
-                my_listener.start();
+                Middleman mm = new Middleman();
+                mm.listen();
             }
         }
     }
