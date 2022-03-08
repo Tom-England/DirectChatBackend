@@ -45,7 +45,7 @@ namespace Network{
 
             // Buffer for reading data
             Byte[] bytes = new Byte[Constants.MESSAGE_STRUCT_SIZE];
-            Message data;
+            Message data = new Message();
 
             // Enter the listening loop.
             while(true)
@@ -59,21 +59,23 @@ namespace Network{
                 // Loop to receive all the data sent by the client.
                 while((i = stream.Read(bytes, 0, bytes.Length))!=0)
                 {
-                    // Translate data bytes to a ASCII string.
-                    //data = mh.from_bytes(bytes);
-                    //Console.WriteLine(bytes.Length);
-                    //recieved = data.text;
-
-                    // Send back a response.
-                    byte[] msg = System.Text.Encoding.ASCII.GetBytes(Constants.ACK);
-                    stream.Write(msg, 0, msg.Length);
+                    data = mh.from_bytes(bytes);
+                    send_response(stream);
                 }
-                data = mh.from_bytes(bytes);
+                
                 //Console.WriteLine(data.text);
                 // Shutdown and end connection
                 
                 return data;
             }
+        }
+
+        public void send_response(NetworkStream stream){
+            // Get a stream object for reading and writing
+            
+            // Send back a response.
+            byte[] msg = System.Text.Encoding.ASCII.GetBytes(Constants.ACK);
+            stream.Write(msg, 0, msg.Length);
         }
     }
 }

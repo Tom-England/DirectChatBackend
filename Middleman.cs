@@ -17,11 +17,11 @@ namespace Network{
             listener.create_server();
             //bool running = true;
             clients.Add(listener.get_client());
-            clients.Add(listener.get_client());
+            //clients.Add(listener.get_client());
 
             foreach (TcpClient c in clients){
                 message_stack.Add(listener.get_message(c));
-                c.Close();
+                //c.Close();
             }
             
             
