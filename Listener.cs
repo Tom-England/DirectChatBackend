@@ -40,6 +40,7 @@ namespace Network{
 
         public Message get_message(TcpClient client){
             
+			//Console.WriteLine("reading message");
 
             MessageHandler mh = new MessageHandler();
 
@@ -47,32 +48,25 @@ namespace Network{
             Byte[] bytes = new Byte[Constants.MESSAGE_STRUCT_SIZE];
             Message data = new Message();
 
-            // Enter the listening loop.
-            while(true)
+
+            // Get a stream object for reading and writing
+            NetworkStream stream = client.GetStream();
+
+            int i;
+
+            // Loop to receive all the data sent by the client.
+            while((i = stream.Read(bytes, 0, bytes.Length))!=0)
             {
-
-                // Get a stream object for reading and writing
-                NetworkStream stream = client.GetStream();
-
-                int i;
-
-                // Loop to receive all the data sent by the client.
-                while((i = stream.Read(bytes, 0, bytes.Length))!=0)
-                {
-                    data = mh.from_bytes(bytes);
-                    send_response(stream);
-                }
-                
-                //Console.WriteLine(data.text);
-                // Shutdown and end connection
-                
-                return data;
+                data = mh.from_bytes(bytes);
+                send_response(stream);
+				break;
             }
-        }
+			return data;
+	    }
 
         public void send_response(NetworkStream stream){
             // Get a stream object for reading and writing
-            
+			//Console.WriteLine("Sending Response");
             // Send back a response.
             byte[] msg = System.Text.Encoding.ASCII.GetBytes(Constants.ACK);
             stream.Write(msg, 0, msg.Length);

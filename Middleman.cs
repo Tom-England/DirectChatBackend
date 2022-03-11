@@ -18,18 +18,17 @@ namespace Network{
             //bool running = true;
             clients.Add(listener.get_client());
             //clients.Add(listener.get_client());
-
-            foreach (TcpClient c in clients){
-                message_stack.Add(listener.get_message(c));
-                //c.Close();
-            }
+			for (int i = 0; i < 10; i++) {
+				foreach (TcpClient c in clients){
+					message_stack.Add(listener.get_message(c));
+					//c.Close();
+				}
+				foreach (Message m in message_stack){
+					Console.WriteLine(m.text);
+				}
+			}
             
-            
-            listener.stop_server();
-
-            foreach (Message m in message_stack){
-                Console.WriteLine(m.text);
-            }
+            listener.stop_server();            
         }
     }
 }

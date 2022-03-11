@@ -6,10 +6,10 @@ using System.Text;
 
 namespace Network{
     class Client{
-        public void Connect(String server, String message)
-        {
-            Message m = new Message(message, server);
-            MessageHandler mh = new MessageHandler();
+
+        TcpClient client;
+		NetworkStream stream;
+        public void create_client(String server){
             try
             {
                 // Create a TcpClient.
@@ -17,23 +17,34 @@ namespace Network{
                 // connected to the same address as specified by the server, port
                 // combination.
                 Int32 port = Constants.PORT;
-                TcpClient client = new TcpClient(server, port);
+                client = new TcpClient(server, port);
+				stream = client.GetStream();
+            }
+            catch (ArgumentNullException e)
+            {
+                Console.WriteLine("ArgumentNullException: {0}", e);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine("SocketException: {0}", e);
+            }
+        }
 
-                Console.WriteLine(server.Length);
+        public void close_client(){
+            client.Close();
+        }
 
-                // Translate the passed message into ASCII and store it as a Byte array.
-                //Byte[] data = System.Text.Encoding.ASCII.GetBytes(MessageHandler.message_to_string(m));
-                Byte[] data = mh.get_bytes(m);
-                Console.WriteLine("Sizeof data: {0}", data.Length);
+        public void send(String message, String dest){
+            bool acked = false;
 
-                // Get a client stream for reading and writing.
-                //  Stream stream = client.GetStream();
+            Message m = new Message(message, dest);
+            MessageHandler mh = new MessageHandler();
 
-                NetworkStream stream = client.GetStream();
-
-                // Send the message to the connected TcpServer.
+            Byte[] data = mh.get_bytes(m);
+            //NetworkStream stream = client.GetStream();
+			
+            while (!acked) {
                 stream.Write(data, 0, data.Length);
-
                 Console.WriteLine("Sent: {0}", message);
 
                 // Receive the TcpServer.response.
@@ -48,22 +59,55 @@ namespace Network{
                 Int32 bytes = stream.Read(data, 0, data.Length);
                 responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
                 Console.WriteLine("Received: {0}", responseData);
+                if (responseData == Constants.ACK) { acked = true; }
+            }
+			//stream.Dispose();
+        }
 
-                // Close everything.
-                stream.Close();
-                client.Close();
+        static string split_string(string str, int start, int end){
+            string substring = "";
+            if (end >= str.Length) {end = str.Length-1;}
+            for (int i = start; i <= end; i++){
+                substring += str[i];
             }
-            catch (ArgumentNullException e)
-            {
-                Console.WriteLine("ArgumentNullException: {0}", e);
-            }
-            catch (SocketException e)
-            {
-                Console.WriteLine("SocketException: {0}", e);
-            }
+            return substring;
+        }
 
-            //Console.WriteLine("\n Press Enter to continue...");
-            //Console.Read();
+        public void run_client(){
+            Client c = new Client();
+            c.create_client(Constants.IP);
+            string msg = "";
+            while (msg != "quit"){
+                // Get a message
+                Console.Write(">>> ");
+                msg = Console.ReadLine();
+				if (msg == "quit") {break;}
+                List<string> msg_segments = new List<string>();
+                bool split = false;
+                Console.WriteLine("String length: " + msg.Length);
+                if (msg.Length > Constants.MESSAGE_SIZE){
+                    split = true;
+                    int start = 0;
+                    for (int i = 0; i <= msg.Length / Constants.MESSAGE_SIZE; i++){
+                        msg_segments.Add(split_string(msg, start, start + Constants.MESSAGE_SIZE));
+                        start += 161;
+                    }
+                }
+                
+                if (split){
+                    foreach(string str in msg_segments){
+                        c.send(str, Constants.IP);
+                        //c.Connect("90.219.214.223", str);
+                        //Console.WriteLine(str);
+                        //Console.WriteLine("-----------");
+                    }
+                } else {
+                    //Client c = new Client();
+                    c.send(msg, Constants.IP);
+                }
+            }
+			//stream.Dispose();
+            c.close_client();
         }
     }
 }
