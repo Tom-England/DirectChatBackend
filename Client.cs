@@ -64,6 +64,33 @@ namespace Network{
 			//stream.Dispose();
         }
 
+        public void send(Message m, TcpClient c){
+            bool acked = false;
+
+            NetworkStream stream = c.GetStream();
+            MessageHandler mh = new MessageHandler();
+            byte[] data = mh.get_bytes(m);
+
+            while (!acked) {
+                stream.Write(data, 0, data.Length);
+                Console.WriteLine("Sent: {0}", m.text);
+
+                // Receive the TcpServer.response.
+
+                // Buffer to store the response bytes.
+                data = new Byte[Constants.MESSAGE_SIZE];
+
+                // String to store the response ASCII representation.
+                String responseData = String.Empty;
+
+                // Read the first batch of the TcpServer response bytes.
+                Int32 bytes = stream.Read(data, 0, data.Length);
+                responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
+                Console.WriteLine("Received: {0}", responseData);
+                if (responseData == Constants.ACK) { acked = true; }
+            }
+        }
+
         static string split_string(string str, int start, int end){
             string substring = "";
             if (end >= str.Length) {end = str.Length-1;}

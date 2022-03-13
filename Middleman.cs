@@ -3,6 +3,7 @@ using System.Net.Sockets;
 namespace Network{
     class Middleman{
 
+		Client mm_client = new Client();
         List<TcpClient> clients = new List<TcpClient>();
         Listener listener;
         LinkedList<Message> message_stack = new LinkedList<Message>();
@@ -53,6 +54,7 @@ namespace Network{
 								// Send the message
 								// Remove the message from the list
 								Console.WriteLine("Removing message {0} going to IP {1}", m.text, m.destination);
+								mm_client.send(m, c);
 								m.sent = true;
 							}
 						}
