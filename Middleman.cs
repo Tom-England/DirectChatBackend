@@ -28,9 +28,21 @@ namespace Network{
             //clients.Add(listener.get_client());
 			Message m;
 			while (running) {
-				foreach (TcpClient c in clients){
-					message_stack.AddLast(listener.get_message(c));
+				List<int> dead_client_indexes = new List<int>(); // Dead Client Indexes could be a good band name?
+				for (int i = 0; i < clients.Count; i++){
+					message_stack.AddLast(listener.get_message(clients[i]));
 					Console.WriteLine("Added {0} to stack", message_stack.Last.Value.text);
+					if (!clients[i].Connected) {
+						clients[i].Close();
+						dead_client_indexes.Add(i);
+					}
+				}
+				foreach(int i in dead_client_indexes){
+					List<TcpClient> new_client_list = new List<TcpClient>();
+					for (int j = 0; j < clients.Count; j++){
+						if (j != i) { new_client_list.Add(clients[j]); }
+					}
+					clients = new_client_list;
 				}
 				for(LinkedListNode<Message> node=message_stack.First; node != null; node=node.Next){
 					m = node.Value;
