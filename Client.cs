@@ -96,7 +96,7 @@ namespace Network{
                 
                 if (split){
                     foreach(string str in msg_segments){
-                        c.send(str, Constants.IP);
+                        c.send(str, "127.0.0.1");
                         //c.Connect("90.219.214.223", str);
                         //Console.WriteLine(str);
                         //Console.WriteLine("-----------");
