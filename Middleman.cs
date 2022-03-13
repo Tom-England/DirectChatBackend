@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Sockets;
 namespace Network{
     class Middleman{
@@ -13,18 +14,35 @@ namespace Network{
             
         }
 
-        public void listen(){
+		public String get_ip(TcpClient c){
+			IPEndPoint ep = c.Client.RemoteEndPoint as IPEndPoint;
+			if (ep == null)
+				return "unknown";
+			return ep.Address.ToString();
+		}
+        public async void listen(){
             listener.create_server();
-            //bool running = true;
+            bool running = true;
             clients.Add(listener.get_client());
+			Console.WriteLine("client ip: {0}", get_ip(clients[0]));
             //clients.Add(listener.get_client());
-			for (int i = 0; i < 10; i++) {
+			while (running) {
 				foreach (TcpClient c in clients){
 					message_stack.Add(listener.get_message(c));
-					//c.Close();
 				}
-				foreach (Message m in message_stack){
-					Console.WriteLine(m.text);
+				for (int i = 0; i < message_stack.Count; i++){
+					if (!message_stack[i].sent){
+						// Check if desination client is connected then forward
+						foreach (TcpClient c in clients){
+							if (get_ip(c) == message_stack[i].destination) {
+								// Send the message
+								// Remove the message from the list
+								message_stack.RemoveAt(i);
+							}
+						}
+						Console.WriteLine(message_stack[i].text);
+					}
+					
 				}
 			}
             

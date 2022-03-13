@@ -8,7 +8,7 @@ namespace Network{
         public String text;
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = Constants.IP_SIZE)]
         public String destination;
-        bool sent;
+        public bool sent;
 
         public Message(String _text, String _dest){
             text = _text;
