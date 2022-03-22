@@ -115,14 +115,18 @@ namespace Network{
 				Byte[] bytes = new Byte[Network.Constants.MESSAGE_STRUCT_SIZE];
         		Network.Message data = new Network.Message();
 				stream = c.get_stream();
-				while((i = stream.Read(bytes, 0, bytes.Length))!=0)
-				{
-					data = mh.from_bytes(bytes);
+				if (stream.DataAvailable){
+					while((i = stream.Read(bytes, 0, bytes.Length))!=0)
+					{
+						Console.WriteLine("Doing something or other");
+						data = mh.from_bytes(bytes);
+					}
+					// Print new messages
+					if (data.text != ""){
+						Console.WriteLine("Recieved: {0}", data.text);
+					}
 				}
-				// Print new messages
-				if (data.text != ""){
-					Console.WriteLine("Recieved: {0}", data.text);
-				}
+				
 
 
                 // Get a message
