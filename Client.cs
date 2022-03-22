@@ -105,6 +105,26 @@ namespace Network{
             c.create_client(Constants.IP);
             string msg = "";
             while (msg != "quit"){
+
+				// Check for messages
+				List<Message> messages = new List<Message>();
+				NetworkStream stream;
+				MessageHandler mh = new MessageHandler();
+				int i;
+				// Check for new messages
+				Byte[] bytes = new Byte[Network.Constants.MESSAGE_STRUCT_SIZE];
+        		Network.Message data = new Network.Message();
+				stream = c.get_stream();
+				while((i = stream.Read(bytes, 0, bytes.Length))!=0)
+				{
+					data = mh.from_bytes(bytes);
+				}
+				// Print new messages
+				if (data.text != ""){
+					Console.WriteLine("Recieved: {0}", data.text);
+				}
+
+
                 // Get a message
                 Console.Write(">>> ");
                 msg = Console.ReadLine();
@@ -115,7 +135,7 @@ namespace Network{
                 if (msg.Length > Constants.MESSAGE_SIZE){
                     split = true;
                     int start = 0;
-                    for (int i = 0; i <= msg.Length / Constants.MESSAGE_SIZE; i++){
+                    for (i = 0; i <= msg.Length / Constants.MESSAGE_SIZE; i++){
                         msg_segments.Add(split_string(msg, start, start + Constants.MESSAGE_SIZE));
                         start += 161;
                     }
@@ -136,5 +156,9 @@ namespace Network{
 			//stream.Dispose();
             c.close_client();
         }
+
+		public NetworkStream get_stream(){
+			return client.GetStream();
+		}
     }
 }

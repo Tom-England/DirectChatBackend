@@ -8,12 +8,12 @@ namespace Network{
 
         TcpListener server=null;
         
-        public void create_server(){
+		public void create_server(string IPAddr){
             try {
                 // Set the TcpListener on port 13000.
                 Int32 port = Constants.PORT;
                 //IPAddress localAddr = IPAddress.Parse("127.0.0.1");
-                IPAddress localAddr = IPAddress.Parse(Constants.IP);
+                IPAddress localAddr = IPAddress.Parse(IPAddr);
 
                 // TcpListener server = new TcpListener(port);
                 server = new TcpListener(localAddr, port);
@@ -23,6 +23,11 @@ namespace Network{
                 Console.WriteLine("SocketException: {0}", e);
             }
             
+        }
+
+
+        public void create_server(){
+            create_server(Constants.IP);
         }
 
         public void stop_server(){
