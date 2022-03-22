@@ -25,9 +25,9 @@ namespace Network{
             listener.create_server("192.168.0.21");
             bool running = true;
             clients.Add(listener.get_client());
-			clients.Add(listener.get_client());
+			//clients.Add(listener.get_client());
 			Console.WriteLine("client ip: {0}", get_ip(clients[0]));
-			Console.WriteLine("client ip: {0}", get_ip(clients[1]));
+			//Console.WriteLine("client ip: {0}", get_ip(clients[1]));
             //clients.Add(listener.get_client());
 			Message m;
 			while (running) {
@@ -60,7 +60,7 @@ namespace Network{
 								m.sent = true;
 							}
 						}
-						Console.WriteLine(m.text);
+						//Console.WriteLine(m.text);
 					}
 				}
 			}

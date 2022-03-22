@@ -63,7 +63,8 @@ namespace Network{
             while((i = stream.Read(bytes, 0, bytes.Length))!=0)
             {
                 data = mh.from_bytes(bytes);
-                send_response(stream);
+                //send_response(stream);
+				//stream.Flush();
 				break;
             }
 			return data;

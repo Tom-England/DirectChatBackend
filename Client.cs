@@ -54,12 +54,13 @@ namespace Network{
 
                 // String to store the response ASCII representation.
                 String responseData = String.Empty;
-
+				/**
                 // Read the first batch of the TcpServer response bytes.
                 Int32 bytes = stream.Read(data, 0, data.Length);
                 responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
                 Console.WriteLine("Received: {0}", responseData);
-                if (responseData == Constants.ACK) { acked = true; }
+                if (responseData == Constants.ACK) { acked = true; }*/
+				acked = true;
             }
 			//stream.Dispose();
         }
@@ -84,10 +85,12 @@ namespace Network{
                 String responseData = String.Empty;
 
                 // Read the first batch of the TcpServer response bytes.
+				/**
                 Int32 bytes = stream.Read(data, 0, data.Length);
                 responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
                 Console.WriteLine("Received: {0}", responseData);
-                if (responseData == Constants.ACK) { acked = true; }
+                if (responseData == Constants.ACK) { acked = true; }*/
+				acked = true;
             }
         }
 
@@ -120,11 +123,15 @@ namespace Network{
 					{
 						Console.WriteLine("Doing something or other");
 						data = mh.from_bytes(bytes);
+						Console.WriteLine("Recieved: {0}", data.text);
 					}
 					// Print new messages
 					if (data.text != ""){
-						Console.WriteLine("Recieved: {0}", data.text);
+						
+						stream.Flush();
 					}
+				} else {
+					Console.WriteLine("Nothing to read");
 				}
 				
 
