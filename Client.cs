@@ -115,18 +115,13 @@ namespace Network{
         	Network.Message data = new Network.Message();
 			stream = c.get_stream();
 			if (stream.DataAvailable){
-				while((i = stream.Read(bytes, 0, bytes.Length))!=0)
+				while((i = stream.Read(bytes, 0, bytes.Length))!=0 && stream.DataAvailable)
 				{
-					Console.WriteLine("Doing something or other");
+					//Console.WriteLine("Doing something or other");
 					data = mh.from_bytes(bytes);
 					Console.WriteLine("Recieved: {0}", data.text);
-					stream.Flush();
+					//stream.Flush();
 					//return data;
-				}
-				// Print new messages
-				if (data.text != ""){
-					
-					stream.Flush();
 				}
 			} else {
 				Console.WriteLine("Nothing to read");
