@@ -103,39 +103,44 @@ namespace Network{
             return substring;
         }
 
+		public void check_messages(Client c){
+			// Check for messages
+			List<Message> messages = new List<Message>();
+			NetworkStream stream;
+			MessageHandler mh = new MessageHandler();
+			int i;
+
+			// Check for new messages
+			Byte[] bytes = new Byte[Network.Constants.MESSAGE_STRUCT_SIZE];
+        	Network.Message data = new Network.Message();
+			stream = c.get_stream();
+			if (stream.DataAvailable){
+				while((i = stream.Read(bytes, 0, bytes.Length))!=0)
+				{
+					Console.WriteLine("Doing something or other");
+					data = mh.from_bytes(bytes);
+					Console.WriteLine("Recieved: {0}", data.text);
+					stream.Flush();
+					//return data;
+				}
+				// Print new messages
+				if (data.text != ""){
+					
+					stream.Flush();
+				}
+			} else {
+				Console.WriteLine("Nothing to read");
+				
+			}
+		}
         public void run_client(){
             Client c = new Client();
             c.create_client(Constants.IP);
             string msg = "";
             while (msg != "quit"){
 
-				// Check for messages
-				List<Message> messages = new List<Message>();
-				NetworkStream stream;
-				MessageHandler mh = new MessageHandler();
-				int i;
-				// Check for new messages
-				Byte[] bytes = new Byte[Network.Constants.MESSAGE_STRUCT_SIZE];
-        		Network.Message data = new Network.Message();
-				stream = c.get_stream();
-				if (stream.DataAvailable){
-					while((i = stream.Read(bytes, 0, bytes.Length))!=0)
-					{
-						Console.WriteLine("Doing something or other");
-						data = mh.from_bytes(bytes);
-						Console.WriteLine("Recieved: {0}", data.text);
-					}
-					// Print new messages
-					if (data.text != ""){
-						
-						stream.Flush();
-					}
-				} else {
-					Console.WriteLine("Nothing to read");
-				}
+				check_messages(c);
 				
-
-
                 // Get a message
                 Console.Write(">>> ");
                 msg = Console.ReadLine();
@@ -146,7 +151,7 @@ namespace Network{
                 if (msg.Length > Constants.MESSAGE_SIZE){
                     split = true;
                     int start = 0;
-                    for (i = 0; i <= msg.Length / Constants.MESSAGE_SIZE; i++){
+                    for (int i = 0; i <= msg.Length / Constants.MESSAGE_SIZE; i++){
                         msg_segments.Add(split_string(msg, start, start + Constants.MESSAGE_SIZE));
                         start += 161;
                     }

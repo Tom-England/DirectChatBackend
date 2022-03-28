@@ -22,7 +22,7 @@ namespace Network{
 			return ep.Address.ToString();
 		}
         public void listen(){
-            listener.create_server("192.168.0.21");
+            listener.create_server("192.168.1.191");
             bool running = true;
             clients.Add(listener.get_client());
 			//clients.Add(listener.get_client());
@@ -47,8 +47,10 @@ namespace Network{
 					}
 					clients = new_client_list;
 				}
-				for(LinkedListNode<Message> node=message_stack.First; node != null; node=node.Next){
+				LinkedListNode<Message> node=message_stack.First;
+				while(node != null){
 					m = node.Value;
+					LinkedListNode<Message> next = node.Next;
 					if (!m.sent){
 						// Check if desination client is connected then forward
 						foreach (TcpClient c in clients){
@@ -58,10 +60,13 @@ namespace Network{
 								Console.WriteLine("Removing message {0} going to IP {1}", m.text, m.destination);
 								mm_client.send(m, c);
 								m.sent = true;
+								message_stack.Remove(node);
+
 							}
 						}
 						//Console.WriteLine(m.text);
 					}
+					node = next;
 				}
 			}
             
