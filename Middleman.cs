@@ -77,7 +77,7 @@ namespace Network{
 					}
 					clients = new_client_list;
 				}
-				LinkedListNode<Message> node=message_stack.First;
+				/*LinkedListNode<Message> node=message_stack.First;
 				while(node != null){
 					m = node.Value;
 					LinkedListNode<Message> next = node.Next;
@@ -97,7 +97,7 @@ namespace Network{
 						//Console.WriteLine(m.text);
 					}
 					node = next;
-				}
+				}*/
 			}
             
             listener.stop_server();            
