@@ -62,7 +62,7 @@ namespace Network{
 				List<int> dead_client_indexes = new List<int>(); // Dead Client Indexes could be a good band name?
 				for (int i = 0; i < clients.Count; i++){
 					m = listener.get_message(clients[i]);
-					handle_client(m);
+					handle_client(m, clients[i]);
 					/**message_stack.AddLast(listener.get_message(clients[i]));
 					Console.WriteLine("Added {0} to stack", message_stack.Last.Value.text);
 					if (!clients[i].Connected) {
