@@ -87,6 +87,27 @@ namespace Network{
 			}
 		}
 
+		public void send_status(Status s, TcpClient c){
+			NetworkStream stream = c.GetStream();
+			bool acked = false;
+			Message m = new Message("-1", s);
+			MessageHandler mh = new MessageHandler();
+			Byte[] data = mh.get_bytes(m);
+
+			while (!acked) {
+				stream.Write(data, 0, data.Length);
+				Console.WriteLine("Sent: {0}", m.status);
+
+				data = new Byte[Constants.MESSAGE_SIZE];
+				Message responseData;
+
+				Int32 bytes = stream.Read(data, 0, data.Length);
+                responseData = mh.from_bytes(data);
+                Console.WriteLine("Received: {0}", responseData.status);
+                if (responseData.status == Status.ack) { acked = true; }
+			}
+		}
+
         public void send(Message m, TcpClient c){
             bool acked = false;
 

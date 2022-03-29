@@ -22,16 +22,30 @@ namespace Network{
 			return ep.Address.ToString();
 		}
 
-		void handle_client(Client c){
-			/// Need to find a way to get the client
-			switch (c.get_status()){
+		void handle_client(Message m, TcpClient c){
+			switch (m.status){
+				case Status.message:
+					message_stack.AddLast(m);
+					mm_client.send_status(Status.ack, c);
+					break;
 				case Status.send:
-					if (c.get_send_ready()){
-						message_stack.AddLast(listener.get_message(c));
-
-					}
+					mm_client.send_status(Status.ack, c);
 					break;
 				case Status.recieve:
+					mm_client.send_status(Status.ack, c);
+					LinkedListNode<Message> node=message_stack.First;
+					Message message;
+					while(node != null){
+						message = node.Value;
+						LinkedListNode<Message> next = node.Next;
+						if (get_ip(c) == message.destination) {
+							// Message is to be sent
+							mm_client.send(message, c);
+							message_stack.Remove(node);
+						}
+						node = next;
+					}
+					mm_client.send_status(Status.done, c);
 					break;
 			}
 		}
@@ -47,7 +61,8 @@ namespace Network{
 			while (running) {
 				List<int> dead_client_indexes = new List<int>(); // Dead Client Indexes could be a good band name?
 				for (int i = 0; i < clients.Count; i++){
-					handle_client(clients[i]);
+					m = listener.get_message(clients[i]);
+					handle_client(m);
 					/**message_stack.AddLast(listener.get_message(clients[i]));
 					Console.WriteLine("Added {0} to stack", message_stack.Last.Value.text);
 					if (!clients[i].Connected) {
