@@ -21,6 +21,7 @@ namespace Network{
                 Int32 port = Constants.PORT;
                 client = new TcpClient(server, port);
 				stream = client.GetStream();
+				Console.WriteLine(stream);
             }
             catch (ArgumentNullException e)
             {
@@ -67,20 +68,21 @@ namespace Network{
 			//stream.Dispose();
         }
 
-		public void send_status(Status s, String dest){
+		public void send_status(Status s, String dest, TcpClient c){
 			bool acked = false;
 			Message m = new Message(dest, s);
 			MessageHandler mh = new MessageHandler();
 			Byte[] data = mh.get_bytes(m);
-
 			while (!acked) {
-				stream.Write(data, 0, data.Length);
+				NetworkStream str = c.GetStream();
+				Console.WriteLine(str);
+				str.Write(data, 0, data.Length);
 				Console.WriteLine("Sent: {0}", m.status);
 
-				data = new Byte[Constants.MESSAGE_SIZE];
+				data = new Byte[Constants.MESSAGE_STRUCT_SIZE];
 				Message responseData;
 
-				Int32 bytes = stream.Read(data, 0, data.Length);
+				Int32 bytes = str.Read(data, 0, data.Length);
                 responseData = mh.from_bytes(data);
                 Console.WriteLine("Received: {0}", responseData.status);
                 if (responseData.status == Status.ack) { acked = true; }
@@ -98,7 +100,7 @@ namespace Network{
 				stream.Write(data, 0, data.Length);
 				Console.WriteLine("Sent: {0}", m.status);
 
-				data = new Byte[Constants.MESSAGE_SIZE];
+				data = new Byte[Constants.MESSAGE_STRUCT_SIZE];
 				Message responseData;
 
 				Int32 bytes = stream.Read(data, 0, data.Length);
@@ -146,29 +148,37 @@ namespace Network{
             return substring;
         }
 
-		public void check_messages(Client c){
-			// 1. Send message to mm asking for messages
-			send_status(Status.recieve, Constants.IP);
-			// 2. Await ACK
+		public Message read_message_from_stream(TcpClient c){
 			Byte[] bytes = new Byte[Network.Constants.MESSAGE_STRUCT_SIZE];
 			Message data = new Message();
 			MessageHandler mh = new MessageHandler();
 			int i;
-			while((i = stream.Read(bytes, 0, bytes.Length))!=0 && stream.DataAvailable)
+			NetworkStream s = c.GetStream();
+			Console.WriteLine("Starting Read");
+			while((i = s.Read(bytes, 0, bytes.Length))!=0 && s.DataAvailable)
 			{
-				//Console.WriteLine("Doing something or other");
+				Console.WriteLine("Doing something or other");
 				data = mh.from_bytes(bytes);
-				Console.WriteLine("Recieved: {0}", data.status);
-				if (data.status != Status.ack){ break; }
 			}
+			return data;
+		}
+
+		public void check_messages(Client c){
+			Console.WriteLine("Checking for messages");
+			// 1. Send message to mm asking for messages
+			send_status(Status.recieve, Constants.IP, c.client);
+			Console.WriteLine("Status Sent");
+			// 2. Await ACK
+			Console.WriteLine("Checking for ACK");
+			Message data = new Message();
+			data = read_message_from_stream(c.client);
+			Console.WriteLine("Recieved: {0}", data.status);
+			if (data.status != Status.ack){ return; }
+
 			// 3. Read messages until recieve DONE
 			while (data.status != Status.done) {
-				while((i = stream.Read(bytes, 0, bytes.Length))!=0 && stream.DataAvailable)
-				{
-					//Console.WriteLine("Doing something or other");
-					data = mh.from_bytes(bytes);
-					Console.WriteLine("Recieved: {0}", data.text);
-				}
+				data = read_message_from_stream(c.client);
+				Console.WriteLine("Recieved: {0}", data.text);
 			}
 			// 4. Exit
 
@@ -214,26 +224,31 @@ namespace Network{
                 List<string> msg_segments = new List<string>();
                 bool split = false;
                 Console.WriteLine("String length: " + msg.Length);
-                if (msg.Length > Constants.MESSAGE_SIZE){
-                    split = true;
-                    int start = 0;
-                    for (int i = 0; i <= msg.Length / Constants.MESSAGE_SIZE; i++){
-                        msg_segments.Add(split_string(msg, start, start + Constants.MESSAGE_SIZE));
-                        start += 161;
-                    }
-                }
-                
-                if (split){
-                    foreach(string str in msg_segments){
-                        c.send(str, "127.0.0.1");
-                        //c.Connect("90.219.214.223", str);
-                        //Console.WriteLine(str);
-                        //Console.WriteLine("-----------");
-                    }
-                } else {
-                    //Client c = new Client();
-                    c.send(msg, Constants.IP);
-                }
+
+				send_status(Status.send, Constants.IP, c.client);
+				Message data = read_message_from_stream(c.client);
+				if (data.status == Status.ack) {
+					if (msg.Length > Constants.MESSAGE_SIZE){
+						split = true;
+						int start = 0;
+						for (int i = 0; i <= msg.Length / Constants.MESSAGE_SIZE; i++){
+							msg_segments.Add(split_string(msg, start, start + Constants.MESSAGE_SIZE));
+							start += 161;
+						}
+					}
+					
+					if (split){
+						foreach(string str in msg_segments){
+							c.send(str, "127.0.0.1");
+							//c.Connect("90.219.214.223", str);
+							//Console.WriteLine(str);
+							//Console.WriteLine("-----------");
+						}
+					} else {
+						//Client c = new Client();
+						c.send(msg, Constants.IP);
+					}
+				}
             }
 			//stream.Dispose();
             c.close_client();
