@@ -147,6 +147,34 @@ namespace Network{
         }
 
 		public void check_messages(Client c){
+			// 1. Send message to mm asking for messages
+			send_status(Status.recieve, Constants.IP);
+			// 2. Await ACK
+			Byte[] bytes = new Byte[Network.Constants.MESSAGE_STRUCT_SIZE];
+			Message data = new Message();
+			MessageHandler mh = new MessageHandler();
+			int i;
+			while((i = stream.Read(bytes, 0, bytes.Length))!=0 && stream.DataAvailable)
+			{
+				//Console.WriteLine("Doing something or other");
+				data = mh.from_bytes(bytes);
+				Console.WriteLine("Recieved: {0}", data.status);
+				if (data.status != Status.ack){ break; }
+			}
+			// 3. Read messages until recieve DONE
+			while (data.status != Status.done) {
+				while((i = stream.Read(bytes, 0, bytes.Length))!=0 && stream.DataAvailable)
+				{
+					//Console.WriteLine("Doing something or other");
+					data = mh.from_bytes(bytes);
+					Console.WriteLine("Recieved: {0}", data.text);
+				}
+			}
+			// 4. Exit
+
+
+		}
+		public void check_messages_old(Client c){
 			// Check for messages
 			List<Message> messages = new List<Message>();
 			NetworkStream stream;
