@@ -63,12 +63,11 @@ namespace Network{
 				for (int i = 0; i < clients.Count; i++){
 					m = listener.get_message(clients[i]);
 					handle_client(m, clients[i]);
-					/**message_stack.AddLast(listener.get_message(clients[i]));
-					Console.WriteLine("Added {0} to stack", message_stack.Last.Value.text);
+					
 					if (!clients[i].Connected) {
 						clients[i].Close();
 						dead_client_indexes.Add(i);
-					}*/
+					}
 				}
 				foreach(int i in dead_client_indexes){
 					List<TcpClient> new_client_list = new List<TcpClient>();
