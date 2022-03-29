@@ -21,6 +21,20 @@ namespace Network{
 				return "unknown";
 			return ep.Address.ToString();
 		}
+
+		void handle_client(Client c){
+			/// Need to find a way to get the client
+			switch (c.get_status()){
+				case Status.send:
+					if (c.get_send_ready()){
+						message_stack.AddLast(listener.get_message(c));
+
+					}
+					break;
+				case Status.recieve:
+					break;
+			}
+		}
         public void listen(){
             listener.create_server("192.168.1.191");
             bool running = true;
@@ -33,12 +47,13 @@ namespace Network{
 			while (running) {
 				List<int> dead_client_indexes = new List<int>(); // Dead Client Indexes could be a good band name?
 				for (int i = 0; i < clients.Count; i++){
-					message_stack.AddLast(listener.get_message(clients[i]));
+					handle_client(clients[i]);
+					/**message_stack.AddLast(listener.get_message(clients[i]));
 					Console.WriteLine("Added {0} to stack", message_stack.Last.Value.text);
 					if (!clients[i].Connected) {
 						clients[i].Close();
 						dead_client_indexes.Add(i);
-					}
+					}*/
 				}
 				foreach(int i in dead_client_indexes){
 					List<TcpClient> new_client_list = new List<TcpClient>();

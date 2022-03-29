@@ -9,6 +9,8 @@ namespace Network{
 
         TcpClient client;
 		NetworkStream stream;
+		bool send_ready = false;
+		Status status;
         public void create_client(String server){
             try
             {
@@ -64,6 +66,26 @@ namespace Network{
             }
 			//stream.Dispose();
         }
+
+		public void send_status(Status s, String dest){
+			bool acked = false;
+			Message m = new Message(dest, s);
+			MessageHandler mh = new MessageHandler();
+			Byte[] data = mh.get_bytes(m);
+
+			while (!acked) {
+				stream.Write(data, 0, data.Length);
+				Console.WriteLine("Sent: {0}", m.status);
+
+				data = new Byte[Constants.MESSAGE_SIZE];
+				Message responseData;
+
+				Int32 bytes = stream.Read(data, 0, data.Length);
+                responseData = mh.from_bytes(data);
+                Console.WriteLine("Received: {0}", responseData.status);
+                if (responseData.status == Status.ack) { acked = true; }
+			}
+		}
 
         public void send(Message m, TcpClient c){
             bool acked = false;
@@ -170,6 +192,18 @@ namespace Network{
 
 		public NetworkStream get_stream(){
 			return client.GetStream();
+		}
+
+		public Status get_status(){
+			return status;
+		}
+
+		void set_status(Status _status){
+			status = _status;
+		}
+
+		public bool get_send_ready(){
+			return send_ready;
 		}
     }
 }
