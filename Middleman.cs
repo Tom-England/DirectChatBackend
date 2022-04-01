@@ -25,14 +25,18 @@ namespace Network{
 		void handle_client(Message m, TcpClient c){
 			switch (m.status){
 				case Status.message:
+					Console.WriteLine("Message");
 					message_stack.AddLast(m);
-					mm_client.send_status(Status.ack, c);
+					mm_client.send_status(Status.ack, c, false);
 					break;
 				case Status.send:
-					mm_client.send_status(Status.ack, c);
+					Console.WriteLine("Send");
+					mm_client.send_status(Status.ack, c, false);
 					break;
 				case Status.recieve:
-					mm_client.send_status(Status.ack, c);
+					Console.WriteLine("Recieve");
+					mm_client.send_status(Status.ack, c, false);
+
 					LinkedListNode<Message> node=message_stack.First;
 					Message message;
 					while(node != null){
@@ -46,6 +50,7 @@ namespace Network{
 						node = next;
 					}
 					mm_client.send_status(Status.done, c);
+					Console.WriteLine("Done Recieve");
 					break;
 			}
 		}

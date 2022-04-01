@@ -21,7 +21,6 @@ namespace Network{
                 Int32 port = Constants.PORT;
                 client = new TcpClient(server, port);
 				stream = client.GetStream();
-				Console.WriteLine(stream);
             }
             catch (ArgumentNullException e)
             {
@@ -75,7 +74,6 @@ namespace Network{
 			Byte[] data = mh.get_bytes(m);
 			while (!acked) {
 				NetworkStream str = c.GetStream();
-				Console.WriteLine(str);
 				str.Write(data, 0, data.Length);
 				Console.WriteLine("Sent: {0}", m.status);
 
@@ -89,7 +87,7 @@ namespace Network{
 			}
 		}
 
-		public void send_status(Status s, TcpClient c){
+		public void send_status(Status s, TcpClient c, bool ack_needed = true){
 			NetworkStream stream = c.GetStream();
 			bool acked = false;
 			Message m = new Message("-1", s);
@@ -98,14 +96,17 @@ namespace Network{
 
 			while (!acked) {
 				stream.Write(data, 0, data.Length);
-				Console.WriteLine("Sent: {0}", m.status);
+				Console.WriteLine("Sent Status: {0}", m.status);
 
-				data = new Byte[Constants.MESSAGE_STRUCT_SIZE];
-				Message responseData;
+				if (!ack_needed) { acked = true; break; }
+				Console.WriteLine("Waiting for ACK");
+				
+				//data = new Byte[Constants.MESSAGE_STRUCT_SIZE];
+				Message responseData = read_message_from_stream(stream);
 
-				Int32 bytes = stream.Read(data, 0, data.Length);
-                responseData = mh.from_bytes(data);
-                Console.WriteLine("Received: {0}", responseData.status);
+				//Int32 bytes = stream.Read(data, 0, data.Length);
+                //responseData = mh.from_bytes(data);
+                //Console.WriteLine("Received: {0}", responseData.status);
                 if (responseData.status == Status.ack) { acked = true; }
 			}
 		}
@@ -148,18 +149,27 @@ namespace Network{
             return substring;
         }
 
-		public Message read_message_from_stream(TcpClient c){
+		public Message read_message_from_stream(Client c){
+			return read_message_from_stream(c.get_stream());
+		}
+
+		public Message read_message_from_stream(NetworkStream s){
 			Byte[] bytes = new Byte[Network.Constants.MESSAGE_STRUCT_SIZE];
 			Message data = new Message();
 			MessageHandler mh = new MessageHandler();
 			int i;
-			NetworkStream s = c.GetStream();
-			Console.WriteLine("Starting Read");
-			while((i = s.Read(bytes, 0, bytes.Length))!=0 && s.DataAvailable)
-			{
-				Console.WriteLine("Doing something or other");
-				data = mh.from_bytes(bytes);
+			//Console.WriteLine("Going to get stream");
+			//Console.WriteLine("Starting Read");
+			///Console.WriteLine(s);
+			if (s.DataAvailable){
+				while((i = s.Read(bytes, 0, bytes.Length))!=0)
+				{
+					//Console.WriteLine("Doing something or other");
+					data = mh.from_bytes(bytes);
+					break;
+				}
 			}
+			
 			return data;
 		}
 
@@ -169,19 +179,20 @@ namespace Network{
 			send_status(Status.recieve, Constants.IP, c.client);
 			Console.WriteLine("Status Sent");
 			// 2. Await ACK
-			Console.WriteLine("Checking for ACK");
+			//Console.WriteLine("Checking for ACK");
 			Message data = new Message();
-			data = read_message_from_stream(c.client);
-			Console.WriteLine("Recieved: {0}", data.status);
-			if (data.status != Status.ack){ return; }
+			data = read_message_from_stream(c);
+			//Console.WriteLine("Recieved: {0}", data.status);
+			//if (data.status != Status.ack){ return; }
 
 			// 3. Read messages until recieve DONE
 			while (data.status != Status.done) {
-				data = read_message_from_stream(c.client);
-				Console.WriteLine("Recieved: {0}", data.text);
+				data = read_message_from_stream(c);
+				//Console.WriteLine("Recieved: {0}", data.status);
 			}
 			// 4. Exit
-
+			Console.WriteLine("Done");
+			send_status(Status.ack, c.client, false);
 
 		}
 		public void check_messages_old(Client c){
@@ -216,7 +227,7 @@ namespace Network{
             while (msg != "quit"){
 
 				check_messages(c);
-				
+				break;
                 // Get a message
                 Console.Write(">>> ");
                 msg = Console.ReadLine();
@@ -225,8 +236,10 @@ namespace Network{
                 bool split = false;
                 Console.WriteLine("String length: " + msg.Length);
 
-				send_status(Status.send, Constants.IP, c.client);
-				Message data = read_message_from_stream(c.client);
+				send_status(Status.send, c.client, false);
+				Console.WriteLine("Send send status");
+				Message data = read_message_from_stream(c);
+				Console.WriteLine(data.status);
 				if (data.status == Status.ack) {
 					if (msg.Length > Constants.MESSAGE_SIZE){
 						split = true;
@@ -240,17 +253,13 @@ namespace Network{
 					if (split){
 						foreach(string str in msg_segments){
 							c.send(str, "127.0.0.1");
-							//c.Connect("90.219.214.223", str);
-							//Console.WriteLine(str);
-							//Console.WriteLine("-----------");
 						}
 					} else {
-						//Client c = new Client();
 						c.send(msg, Constants.IP);
 					}
 				}
+				else { break; }
             }
-			//stream.Dispose();
             c.close_client();
         }
 
