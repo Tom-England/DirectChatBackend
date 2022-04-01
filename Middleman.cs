@@ -21,6 +21,40 @@ namespace Network{
 				return "unknown";
 			return ep.Address.ToString();
 		}
+
+		void handle_client(Message m, TcpClient c){
+			switch (m.status){
+				case Status.message:
+					Console.WriteLine("Message");
+					Console.WriteLine("Recieved: {0}", m.text);
+					message_stack.AddLast(m);
+					mm_client.send_status(Status.ack, c, false);
+					break;
+				case Status.send:
+					Console.WriteLine("Send");
+					mm_client.send_status(Status.ack, c, false);
+					break;
+				case Status.recieve:
+					Console.WriteLine("Recieve");
+					mm_client.send_status(Status.ack, c, false);
+
+					LinkedListNode<Message> node=message_stack.First;
+					Message message;
+					while(node != null){
+						message = node.Value;
+						LinkedListNode<Message> next = node.Next;
+						if (get_ip(c) == message.destination) {
+							// Message is to be sent
+							mm_client.send(message, c);
+							message_stack.Remove(node);
+						}
+						node = next;
+					}
+					mm_client.send_status(Status.done, c);
+					Console.WriteLine("Done Recieve");
+					break;
+			}
+		}
         public void listen(){
             listener.create_server("192.168.1.191");
             bool running = true;
@@ -33,8 +67,9 @@ namespace Network{
 			while (running) {
 				List<int> dead_client_indexes = new List<int>(); // Dead Client Indexes could be a good band name?
 				for (int i = 0; i < clients.Count; i++){
-					message_stack.AddLast(listener.get_message(clients[i]));
-					Console.WriteLine("Added {0} to stack", message_stack.Last.Value.text);
+					m = listener.get_message(clients[i]);
+					handle_client(m, clients[i]);
+					
 					if (!clients[i].Connected) {
 						clients[i].Close();
 						dead_client_indexes.Add(i);
@@ -47,7 +82,7 @@ namespace Network{
 					}
 					clients = new_client_list;
 				}
-				LinkedListNode<Message> node=message_stack.First;
+				/*LinkedListNode<Message> node=message_stack.First;
 				while(node != null){
 					m = node.Value;
 					LinkedListNode<Message> next = node.Next;
@@ -67,7 +102,7 @@ namespace Network{
 						//Console.WriteLine(m.text);
 					}
 					node = next;
-				}
+				}*/
 			}
             
             listener.stop_server();            

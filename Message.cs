@@ -9,11 +9,22 @@ namespace Network{
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = Constants.IP_SIZE)]
         public String destination;
         public bool sent;
-
+		public Status status;
+		public bool created = false;
+		
+		public Message(String _dest, Status _status){
+			destination = _dest;
+			status = _status;
+			sent = false;
+			text = "";
+			created = true;
+		}
         public Message(String _text, String _dest){
             text = _text;
             destination = _dest;
             sent = false;
+			status = Status.message;
+			created = true;
         }
     }
 
