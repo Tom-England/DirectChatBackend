@@ -188,7 +188,10 @@ namespace Network{
 			// 3. Read messages until recieve DONE
 			while (data.status != Status.done) {
 				data = read_message_from_stream(c);
-				//Console.WriteLine("Recieved: {0}", data.status);
+				if (data.created) {
+					Console.WriteLine("Recieved: {0}", data.text);
+				}
+				
 			}
 			// 4. Exit
 			Console.WriteLine("Done");
@@ -227,7 +230,7 @@ namespace Network{
             while (msg != "quit"){
 
 				check_messages(c);
-				break;
+				
                 // Get a message
                 Console.Write(">>> ");
                 msg = Console.ReadLine();
@@ -236,11 +239,11 @@ namespace Network{
                 bool split = false;
                 Console.WriteLine("String length: " + msg.Length);
 
-				send_status(Status.send, c.client, false);
-				Console.WriteLine("Send send status");
-				Message data = read_message_from_stream(c);
-				Console.WriteLine(data.status);
-				if (data.status == Status.ack) {
+				send_status(Status.send, c.client, true);
+				//Console.WriteLine("Send send status");
+				//Message data = read_message_from_stream(c);
+				//Console.WriteLine(data.status);
+				//if (data.status == Status.ack) {
 					if (msg.Length > Constants.MESSAGE_SIZE){
 						split = true;
 						int start = 0;
@@ -257,8 +260,8 @@ namespace Network{
 					} else {
 						c.send(msg, Constants.IP);
 					}
-				}
-				else { break; }
+				//}
+				//else { break; }
             }
             c.close_client();
         }

@@ -26,6 +26,7 @@ namespace Network{
 			switch (m.status){
 				case Status.message:
 					Console.WriteLine("Message");
+					Console.WriteLine("Recieved: {0}", m.text);
 					message_stack.AddLast(m);
 					mm_client.send_status(Status.ack, c, false);
 					break;
