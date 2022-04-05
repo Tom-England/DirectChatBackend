@@ -14,7 +14,10 @@ namespace Network{
             } else if (args[0] == "server"){
                 Middleman mm = new Middleman();
                 mm.listen();
-            }
+            } else if (args[0] == "dbtest"){
+				Storage.DatabaseHandler dbh = new Storage.DatabaseHandler();
+				dbh.test();
+			}
         }
     }
 }
