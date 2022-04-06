@@ -7,6 +7,7 @@ using System.Text;
 namespace Network{
     class Client{
 
+        Storage.DatabaseHandler dbh = new Storage.DatabaseHandler();
         TcpClient client;
 		NetworkStream stream;
 		bool send_ready = false;
@@ -75,14 +76,14 @@ namespace Network{
 			while (!acked) {
 				NetworkStream str = c.GetStream();
 				str.Write(data, 0, data.Length);
-				Console.WriteLine("Sent: {0}", m.status);
+				//Console.WriteLine("Sent: {0}", m.status);
 
 				data = new Byte[Constants.MESSAGE_STRUCT_SIZE];
 				Message responseData;
 
 				Int32 bytes = str.Read(data, 0, data.Length);
                 responseData = mh.from_bytes(data);
-                Console.WriteLine("Received: {0}", responseData.status);
+                //Console.WriteLine("Received: {0}", responseData.status);
                 if (responseData.status == Status.ack) { acked = true; }
 			}
 		}
@@ -96,10 +97,10 @@ namespace Network{
 
 			while (!acked) {
 				stream.Write(data, 0, data.Length);
-				Console.WriteLine("Sent Status: {0}", m.status);
+				//Console.WriteLine("Sent Status: {0}", m.status);
 
 				if (!ack_needed) { acked = true; break; }
-				Console.WriteLine("Waiting for ACK");
+				//Console.WriteLine("Waiting for ACK");
 				
 				//data = new Byte[Constants.MESSAGE_STRUCT_SIZE];
 				Message responseData = read_message_from_stream(stream);
@@ -120,7 +121,7 @@ namespace Network{
 
             while (!acked) {
                 stream.Write(data, 0, data.Length);
-                Console.WriteLine("Sent: {0}", m.text);
+                //Console.WriteLine("Sent: {0}", m.text);
 
                 // Receive the TcpServer.response.
 
@@ -174,10 +175,10 @@ namespace Network{
 		}
 
 		public void check_messages(Client c){
-			Console.WriteLine("Checking for messages");
+			//Console.WriteLine("Checking for messages");
 			// 1. Send message to mm asking for messages
 			send_status(Status.recieve, Constants.IP, c.client);
-			Console.WriteLine("Status Sent");
+			//Console.WriteLine("Status Sent");
 			// 2. Await ACK
 			//Console.WriteLine("Checking for ACK");
 			Message data = new Message();
@@ -188,13 +189,14 @@ namespace Network{
 			// 3. Read messages until recieve DONE
 			while (data.status != Status.done) {
 				data = read_message_from_stream(c);
-				if (data.created) {
-					Console.WriteLine("Recieved: {0}", data.text);
+				if (data.created && data.status == Status.message) {
+					//Console.WriteLine("Recieved: {0}", data.text);
+					dbh.add_message(data.text, 1);
 				}
 				
 			}
 			// 4. Exit
-			Console.WriteLine("Done");
+			//Console.WriteLine("Done");
 			send_status(Status.ack, c.client, false);
 
 		}
@@ -227,17 +229,22 @@ namespace Network{
             Client c = new Client();
             c.create_client(Constants.IP);
             string msg = "";
+            //dbh.create();
+            dbh.connect();
+            //dbh.setup();
             while (msg != "quit"){
 
 				check_messages(c);
-				
+
+                dbh.get_all_messages_from_user(1);
+
                 // Get a message
                 Console.Write(">>> ");
                 msg = Console.ReadLine();
 				if (msg == "quit") {break;}
                 List<string> msg_segments = new List<string>();
                 bool split = false;
-                Console.WriteLine("String length: " + msg.Length);
+                //Console.WriteLine("String length: " + msg.Length);
 
 				send_status(Status.send, c.client, true);
 				//Console.WriteLine("Send send status");
@@ -264,6 +271,7 @@ namespace Network{
 				//else { break; }
             }
             c.close_client();
+            dbh.disconnect();
         }
 
 		public NetworkStream get_stream(){

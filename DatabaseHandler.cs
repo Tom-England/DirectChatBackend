@@ -6,7 +6,7 @@ namespace Storage
 	class DatabaseHandler{
 		SQLiteConnection db_connection;
 
-		void create(){
+		public void create(){
 			SQLiteConnection.CreateFile("MyDatabase.sqlite");
 		}
 		public void setup(){
