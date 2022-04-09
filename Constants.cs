@@ -4,7 +4,7 @@ namespace Network{
         public const int IP_SIZE = 100;
         public const int MESSAGE_STRUCT_SIZE = 272;
         public const string ACK = "ACK";
-        public const string IP = "192.168.1.191";
+        public const string IP = "127.0.0.1";
         public const Int32 PORT = 6679;
     }
 }

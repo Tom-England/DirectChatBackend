@@ -56,7 +56,7 @@ namespace Network{
 			}
 		}
         public void listen(){
-            listener.create_server("192.168.1.191");
+            listener.create_server(Constants.IP);
             bool running = true;
             clients.Add(listener.get_client());
 			//clients.Add(listener.get_client());

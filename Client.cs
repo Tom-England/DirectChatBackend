@@ -3,7 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-
+using System.Threading;
 namespace Network{
     class Client{
 
@@ -76,15 +76,16 @@ namespace Network{
 			while (!acked) {
 				NetworkStream str = c.GetStream();
 				str.Write(data, 0, data.Length);
-				//Console.WriteLine("Sent: {0}", m.status);
+				Console.WriteLine("Sent: {0}", m.status);
 
 				data = new Byte[Constants.MESSAGE_STRUCT_SIZE];
 				Message responseData;
 
 				Int32 bytes = str.Read(data, 0, data.Length);
                 responseData = mh.from_bytes(data);
-                //Console.WriteLine("Received: {0}", responseData.status);
+                Console.WriteLine("Received: {0}", responseData.status);
                 if (responseData.status == Status.ack) { acked = true; }
+				Thread.Sleep(100);
 			}
 		}
 
@@ -97,7 +98,7 @@ namespace Network{
 
 			while (!acked) {
 				stream.Write(data, 0, data.Length);
-				//Console.WriteLine("Sent Status: {0}", m.status);
+				Console.WriteLine("Sent Status: {0}", m.status);
 
 				if (!ack_needed) { acked = true; break; }
 				//Console.WriteLine("Waiting for ACK");
@@ -107,8 +108,9 @@ namespace Network{
 
 				//Int32 bytes = stream.Read(data, 0, data.Length);
                 //responseData = mh.from_bytes(data);
-                //Console.WriteLine("Received: {0}", responseData.status);
+                Console.WriteLine("Received: {0}", responseData.status);
                 if (responseData.status == Status.ack) { acked = true; }
+				Thread.Sleep(100);
 			}
 		}
 
@@ -226,7 +228,8 @@ namespace Network{
 			}
 		}
         public void run_client(){
-            Client c = new Client();
+            User u = new User();
+			Client c = new Client();
             c.create_client(Constants.IP);
             string msg = "";
             //dbh.create();
