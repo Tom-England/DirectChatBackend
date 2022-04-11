@@ -25,13 +25,14 @@ namespace Storage
 				user_name VARCHAR(20)
 			);";
 
-			string password = @"CREATE TABLE password
+			string account = @"CREATE TABLE account
 			(
+			 	account_id VARCHAR(40) PRIMARY KEY NOT NULL,
 				password_hash CHAR(20)
 			);";
 			run_command(messages);
 			run_command(users);
-			run_command(password);
+			run_command(account);
 		}
 
 		public void connect(){
@@ -46,6 +47,25 @@ namespace Storage
 		public int run_command(string sql){
 			SQLiteCommand command = new SQLiteCommand(sql, db_connection);
 			return command.ExecuteNonQuery();
+		}
+		
+		public void register(Guid id) {
+			string s_id = id.ToString();
+			string sql = "INSERT INTO account(account_id) VALUES ('"+s_id+"');";
+			run_command(sql);
+		}
+
+		public Guid get_account_id(){
+			string sql = "SELECT account_id FROM account";
+			SQLiteCommand command = new SQLiteCommand(sql, db_connection);
+			SQLiteDataReader reader = command.ExecuteReader();
+			Guid id = Guid.Empty;
+			if (reader.HasRows) {
+				while (reader.Read()){
+					id = Guid.Parse(reader["account_id"].ToString());
+				}
+			}
+			return id;
 		}
 
 		public void add_user(string username, Guid id){

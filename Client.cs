@@ -229,6 +229,16 @@ namespace Network{
 				
 			}
 		}
+
+		void setup_id(User u){
+			Guid temp_id = dbh.get_account_id();	
+			if (temp_id != Guid.Empty) {
+				u.Id = temp_id;
+			} else {
+				dbh.register(u.Id);
+			}
+		}
+
         public void run_client(){
             User u = new User("user");
 			Client c = new Client();
@@ -237,7 +247,8 @@ namespace Network{
             //dbh.create();
             dbh.connect();
             //dbh.setup();
-            dbh.add_user(u.Name, u.Id);
+			setup_id(u);
+            //dbh.add_user(u.Name, u.Id);
 			while (msg != "quit"){
 
 				check_messages(c, u.Id);
