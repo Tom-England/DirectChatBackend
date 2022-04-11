@@ -1,7 +1,7 @@
 using System;
 
-namespace network{
-	Class User{
+namespace Network{
+	class User{
 		private string name;
 		public string Name
 		{

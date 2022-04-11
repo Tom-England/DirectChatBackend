@@ -37,15 +37,15 @@ namespace Network{
             client.Close();
         }
 
-        public void send(String message, String dest){
+        public void send(String message, String dest, Guid _id){
             bool acked = false;
 
-            Message m = new Message(message, dest);
+            Message m = new Message(message, dest, _id);
             MessageHandler mh = new MessageHandler();
 
             Byte[] data = mh.get_bytes(m);
             //NetworkStream stream = client.GetStream();
-			
+			Console.WriteLine("Sending {0} bytes", data.Length);	
             while (!acked) {
                 stream.Write(data, 0, data.Length);
                 Console.WriteLine("Sent: {0}", message);
@@ -68,11 +68,12 @@ namespace Network{
 			//stream.Dispose();
         }
 
-		public void send_status(Status s, String dest, TcpClient c){
+		public void send_status(Status s, String dest, TcpClient c, Guid id){
 			bool acked = false;
-			Message m = new Message(dest, s);
+			Message m = new Message(dest, s, id);
 			MessageHandler mh = new MessageHandler();
 			Byte[] data = mh.get_bytes(m);
+			Console.WriteLine("Sending {0} bytes", data.Length);
 			while (!acked) {
 				NetworkStream str = c.GetStream();
 				str.Write(data, 0, data.Length);
@@ -89,10 +90,10 @@ namespace Network{
 			}
 		}
 
-		public void send_status(Status s, TcpClient c, bool ack_needed = true){
+		public void send_status(Status s, TcpClient c, Guid id, bool ack_needed = true ){
 			NetworkStream stream = c.GetStream();
 			bool acked = false;
-			Message m = new Message("-1", s);
+			Message m = new Message("-1", s, id);
 			MessageHandler mh = new MessageHandler();
 			Byte[] data = mh.get_bytes(m);
 
@@ -130,7 +131,8 @@ namespace Network{
                 // Buffer to store the response bytes.
                 data = new Byte[Constants.MESSAGE_SIZE];
 
-                // String to store the response ASCII representation.
+                // String to store the response ASCII 
+				// representation.
                 String responseData = String.Empty;
 
                 // Read the first batch of the TcpServer response bytes.
@@ -176,10 +178,10 @@ namespace Network{
 			return data;
 		}
 
-		public void check_messages(Client c){
+		public void check_messages(Client c, Guid id){
 			//Console.WriteLine("Checking for messages");
 			// 1. Send message to mm asking for messages
-			send_status(Status.recieve, Constants.IP, c.client);
+			send_status(Status.recieve, Constants.IP, c.client, id);
 			//Console.WriteLine("Status Sent");
 			// 2. Await ACK
 			//Console.WriteLine("Checking for ACK");
@@ -193,13 +195,13 @@ namespace Network{
 				data = read_message_from_stream(c);
 				if (data.created && data.status == Status.message) {
 					//Console.WriteLine("Recieved: {0}", data.text);
-					dbh.add_message(data.text, 1);
+					dbh.add_message(data.text, data.sender_id);
 				}
 				
 			}
 			// 4. Exit
 			//Console.WriteLine("Done");
-			send_status(Status.ack, c.client, false);
+			send_status(Status.ack, c.client, id, false);
 
 		}
 		public void check_messages_old(Client c){
@@ -228,18 +230,19 @@ namespace Network{
 			}
 		}
         public void run_client(){
-            User u = new User();
+            User u = new User("user");
 			Client c = new Client();
             c.create_client(Constants.IP);
             string msg = "";
             //dbh.create();
             dbh.connect();
             //dbh.setup();
-            while (msg != "quit"){
+            dbh.add_user(u.Name, u.Id);
+			while (msg != "quit"){
 
-				check_messages(c);
+				check_messages(c, u.Id);
 
-                dbh.get_all_messages_from_user(1);
+                dbh.get_all_messages_from_user(u.Id);
 
                 // Get a message
                 Console.Write(">>> ");
@@ -249,7 +252,7 @@ namespace Network{
                 bool split = false;
                 //Console.WriteLine("String length: " + msg.Length);
 
-				send_status(Status.send, c.client, true);
+				send_status(Status.send, c.client, u.Id, true);
 				//Console.WriteLine("Send send status");
 				//Message data = read_message_from_stream(c);
 				//Console.WriteLine(data.status);
@@ -265,10 +268,10 @@ namespace Network{
 					
 					if (split){
 						foreach(string str in msg_segments){
-							c.send(str, "127.0.0.1");
+							c.send(str, Constants.IP, u.Id);
 						}
 					} else {
-						c.send(msg, Constants.IP);
+						c.send(msg, Constants.IP, u.Id);
 					}
 				//}
 				//else { break; }

@@ -21,7 +21,7 @@ namespace Storage
 			
 			string users = @"CREATE TABLE users
 			(
-				user_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+				user_id VARCHAR(40) PRIMARY KEY NOT NULL,
 				user_name VARCHAR(20)
 			);";
 
@@ -48,13 +48,15 @@ namespace Storage
 			return command.ExecuteNonQuery();
 		}
 
-		public void add_user(string username){
-			string sql = "INSERT INTO users(user_name) VALUES ('"+username+"')";
+		public void add_user(string username, Guid id){
+			string s_id = id.ToString();
+			string sql = "INSERT INTO users(user_id, user_name) VALUES ('"+s_id+"', '"+username+"')";
 			run_command(sql);
 		}
 
-		public void add_message(string message, int user_id){
-			string sql = "INSERT INTO messages(message_text, sender_id) VALUES ('"+message+"', "+user_id+")";
+		public void add_message(string message, Guid id){
+			string s_id = id.ToString();
+			string sql = "INSERT INTO messages(message_text, sender_id) VALUES ('"+message+"', '"+s_id+"')";
 			run_command(sql);
 		}
 
@@ -68,12 +70,13 @@ namespace Storage
 			}
 		}
 
-		public void get_all_messages_from_user(int user_id){
-			string sql = "SELECT * FROM messages WHERE sender_id="+user_id+"";
+		public void get_all_messages_from_user(Guid id){
+			string s_id = id.ToString();
+			string sql = "SELECT * FROM messages WHERE sender_id='"+s_id+"'";
 			SQLiteCommand command = new SQLiteCommand(sql, db_connection);
 			SQLiteDataReader reader = command.ExecuteReader();
 			while (reader.Read()){
-				Console.WriteLine(reader["message_text"]);
+				Console.WriteLine(id + " : " + reader["message_text"]);
 			}
 		}
 
@@ -81,15 +84,15 @@ namespace Storage
 			create();
 			connect();
 			setup();
-			add_user("Tom");
-			add_user("Steve");
-			add_message("Hello, World!", 1);
-			add_message("Im Steve", 2);
+			//add_user("Tom");
+			//add_user("Steve");
+			//add_message("Hello, World!", 1);
+			//add_message("Im Steve", 2);
 			Console.WriteLine("========Users========");
 			get_all_users();
 			Console.WriteLine("========Texts========");
-			get_all_messages_from_user(1);
-			get_all_messages_from_user(2);
+			//get_all_messages_from_user(1);
+			//get_all_messages_from_user(2);
 			disconnect();
 		}
 	}

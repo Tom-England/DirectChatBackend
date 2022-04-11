@@ -7,6 +7,7 @@ namespace Network{
         List<TcpClient> clients = new List<TcpClient>();
         Listener listener;
         LinkedList<Message> message_stack = new LinkedList<Message>();
+		User u = new User("DNS");
         public Middleman(){
             listener = new Listener();
         }
@@ -28,15 +29,15 @@ namespace Network{
 					Console.WriteLine("Message");
 					Console.WriteLine("Recieved: {0}", m.text);
 					message_stack.AddLast(m);
-					mm_client.send_status(Status.ack, c, false);
+					mm_client.send_status(Status.ack, c, u.Id, false);
 					break;
 				case Status.send:
 					Console.WriteLine("Send");
-					mm_client.send_status(Status.ack, c, false);
+					mm_client.send_status(Status.ack, c, u.Id, false);
 					break;
 				case Status.recieve:
 					Console.WriteLine("Recieve");
-					mm_client.send_status(Status.ack, c, false);
+					mm_client.send_status(Status.ack, c, u.Id, false);
 
 					LinkedListNode<Message> node=message_stack.First;
 					Message message;
@@ -50,7 +51,7 @@ namespace Network{
 						}
 						node = next;
 					}
-					mm_client.send_status(Status.done, c);
+					mm_client.send_status(Status.done, c, u.Id);
 					Console.WriteLine("Done Recieve");
 					break;
 			}

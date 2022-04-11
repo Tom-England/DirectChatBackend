@@ -17,6 +17,7 @@ namespace Network{
 			status = _status;
 			sent = false;
 			text = "";
+			sender_id = _id;
 			// created = true;
 		}
         public Message(String _text, String _dest, Guid _id){
