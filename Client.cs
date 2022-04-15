@@ -224,7 +224,7 @@ namespace Network{
             string msg = "";
             //dbh.create();
             dbh.connect();
-            //dbh.setup();
+			dbh.setup();
 			setup_id(u);
             //dbh.add_user(u.Name, u.Id);
 			while (msg != "quit"){

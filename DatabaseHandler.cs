@@ -12,7 +12,7 @@ namespace Storage
 		}
 		public void setup(){
 			
-			string messages = @"CREATE TABLE messages
+			string messages = @"CREATE TABLE if not exists messages
 			(
 				message_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 				message_text CHAR(" + Network.Constants.MESSAGE_SIZE + @") NOT NULL,
@@ -20,13 +20,13 @@ namespace Storage
 				FOREIGN KEY(sender_id) REFERENCES users(user_id)
 			);";
 			
-			string users = @"CREATE TABLE users
+			string users = @"CREATE TABLE if not exists users
 			(
 				user_id VARCHAR(40) PRIMARY KEY NOT NULL,
 				user_name VARCHAR(20)
 			);";
 
-			string account = @"CREATE TABLE account
+			string account = @"CREATE TABLE if not exists account
 			(
 			 	account_id VARCHAR(40) PRIMARY KEY NOT NULL,
 				password_hash CHAR(20)
@@ -50,6 +50,13 @@ namespace Storage
 			command.CommandText = sql;
 			return command.ExecuteNonQuery();
 		}
+
+		public SqliteDataReader run_reader(string sql){
+			SqliteCommand command = db_connection.CreateCommand();
+			command.CommandText = sql;
+			SqliteDataReader reader = command.ExecuteReader();
+			return reader;
+		}
 		
 		public void register(Guid id) {
 			string s_id = id.ToString();
@@ -59,9 +66,7 @@ namespace Storage
 
 		public Guid get_account_id(){
 			string sql = "SELECT account_id FROM account";
-			SqliteCommand command = db_connection.CreateCommand();
-			command.CommandText = sql;
-			SqliteDataReader reader = command.ExecuteReader();
+			SqliteDataReader reader = run_reader(sql);
 			Guid id = Guid.Empty;
 			if (reader.HasRows) {
 				while (reader.Read()){
@@ -73,9 +78,7 @@ namespace Storage
 		public bool user_exists(Guid id){
 			string s_id = id.ToString();
 			string sql = "SELECT COUNT(*) FROM users WHERE user_id = '"+s_id+"'";
-			SqliteCommand command = db_connection.CreateCommand();
-			command.CommandText = sql;
-			SqliteDataReader reader = command.ExecuteReader();
+			SqliteDataReader reader = run_reader(sql);
 			while (reader.Read()){
 				if (reader["COUNT(*)"].ToString() != "0") {
 					return true;
@@ -98,9 +101,7 @@ namespace Storage
 		public void get_all_users(){
 
 			string sql = "select * from users";
-			SqliteCommand command = db_connection.CreateCommand();
-			command.CommandText = sql;
-			SqliteDataReader reader = command.ExecuteReader();
+			SqliteDataReader reader = run_reader(sql);
 			while (reader.Read()){
 				Console.WriteLine("Name: " + reader["user_name"] + "\tID: " + reader["user_id"]);
 			}
@@ -117,6 +118,17 @@ namespace Storage
 			}
 		}
 		
+		public bool check_if_setup(){
+			string sql = "SELECT COUNT(object_id) FROM sys.tables WHERE name = 'users';";
+			SqliteDataReader reader = run_reader(sql);
+			while (reader.Read()){
+				if (reader["COUNT(object_id)"].ToString() != "0" ) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public void test(){
 			create();
 			connect();
