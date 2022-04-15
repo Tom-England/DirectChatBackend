@@ -195,6 +195,9 @@ namespace Network{
 				data = read_message_from_stream(c);
 				if (data.created && data.status == Status.message) {
 					//Console.WriteLine("Recieved: {0}", data.text);
+					if (!dbh.user_exists(data.sender_id)){
+						dbh.add_user("New User", data.sender_id);
+					}
 					dbh.add_message(data.text, data.sender_id);
 				}
 				

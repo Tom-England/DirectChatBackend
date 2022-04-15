@@ -1,13 +1,14 @@
 using System;
-using System.Data.SQLite;
+using Microsoft.Data.Sqlite;
 
 namespace Storage
 {
 	class DatabaseHandler{
-		SQLiteConnection db_connection;
+		string db_connection_str = "Data Source=data.db";
+		SqliteConnection db_connection;
 
 		public void create(){
-			SQLiteConnection.CreateFile("MyDatabase.sqlite");
+			db_connection = new SqliteConnection(db_connection_str);
 		}
 		public void setup(){
 			
@@ -36,7 +37,7 @@ namespace Storage
 		}
 
 		public void connect(){
-			db_connection = new SQLiteConnection("Data Source=MyDatabase.sqlite;Version=3;");
+			db_connection = new SqliteConnection(db_connection_str);
 			db_connection.Open();
 		}
 
@@ -45,7 +46,8 @@ namespace Storage
 		}
 
 		public int run_command(string sql){
-			SQLiteCommand command = new SQLiteCommand(sql, db_connection);
+			SqliteCommand command = db_connection.CreateCommand();
+			command.CommandText = sql;
 			return command.ExecuteNonQuery();
 		}
 		
@@ -57,8 +59,9 @@ namespace Storage
 
 		public Guid get_account_id(){
 			string sql = "SELECT account_id FROM account";
-			SQLiteCommand command = new SQLiteCommand(sql, db_connection);
-			SQLiteDataReader reader = command.ExecuteReader();
+			SqliteCommand command = db_connection.CreateCommand();
+			command.CommandText = sql;
+			SqliteDataReader reader = command.ExecuteReader();
 			Guid id = Guid.Empty;
 			if (reader.HasRows) {
 				while (reader.Read()){
@@ -67,7 +70,19 @@ namespace Storage
 			}
 			return id;
 		}
-
+		public bool user_exists(Guid id){
+			string s_id = id.ToString();
+			string sql = "SELECT COUNT(*) FROM users WHERE user_id = '"+s_id+"'";
+			SqliteCommand command = db_connection.CreateCommand();
+			command.CommandText = sql;
+			SqliteDataReader reader = command.ExecuteReader();
+			while (reader.Read()){
+				if (reader["COUNT(*)"].ToString() != "0") {
+					return true;
+				}
+			}
+			return false;
+		}
 		public void add_user(string username, Guid id){
 			string s_id = id.ToString();
 			string sql = "INSERT INTO users(user_id, user_name) VALUES ('"+s_id+"', '"+username+"')";
@@ -83,8 +98,9 @@ namespace Storage
 		public void get_all_users(){
 
 			string sql = "select * from users";
-			SQLiteCommand command = new SQLiteCommand(sql, db_connection);
-			SQLiteDataReader reader = command.ExecuteReader();
+			SqliteCommand command = db_connection.CreateCommand();
+			command.CommandText = sql;
+			SqliteDataReader reader = command.ExecuteReader();
 			while (reader.Read()){
 				Console.WriteLine("Name: " + reader["user_name"] + "\tID: " + reader["user_id"]);
 			}
@@ -93,13 +109,14 @@ namespace Storage
 		public void get_all_messages_from_user(Guid id){
 			string s_id = id.ToString();
 			string sql = "SELECT * FROM messages WHERE sender_id='"+s_id+"'";
-			SQLiteCommand command = new SQLiteCommand(sql, db_connection);
-			SQLiteDataReader reader = command.ExecuteReader();
+			SqliteCommand command = db_connection.CreateCommand();
+			command.CommandText = sql;
+			SqliteDataReader reader = command.ExecuteReader();
 			while (reader.Read()){
 				Console.WriteLine(id + " : " + reader["message_text"]);
 			}
 		}
-
+		
 		public void test(){
 			create();
 			connect();
