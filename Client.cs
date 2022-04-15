@@ -204,31 +204,6 @@ namespace Network{
 			send_status(Status.ack, c.client, id, false);
 
 		}
-		public void check_messages_old(Client c){
-			// Check for messages
-			List<Message> messages = new List<Message>();
-			NetworkStream stream;
-			MessageHandler mh = new MessageHandler();
-			int i;
-
-			// Check for new messages
-			Byte[] bytes = new Byte[Network.Constants.MESSAGE_STRUCT_SIZE];
-        	Network.Message data = new Network.Message();
-			stream = c.get_stream();
-			if (stream.DataAvailable){
-				while((i = stream.Read(bytes, 0, bytes.Length))!=0 && stream.DataAvailable)
-				{
-					//Console.WriteLine("Doing something or other");
-					data = mh.from_bytes(bytes);
-					Console.WriteLine("Recieved: {0}", data.text);
-					//stream.Flush();
-					//return data;
-				}
-			} else {
-				Console.WriteLine("Nothing to read");
-				
-			}
-		}
 
 		void setup_id(User u){
 			Guid temp_id = dbh.get_account_id();	
