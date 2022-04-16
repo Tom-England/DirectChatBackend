@@ -30,17 +30,20 @@ namespace Network{
             create_server(Constants.IP);
         }
 
+		public void start_server(){
+			server.Start();
+		}
+
         public void stop_server(){
             server.Stop();
         }
 
-        public TcpClient get_client(){
-            // Start listening for client requests.
-            server.Start();
-            while (true){
-                TcpClient client = server.AcceptTcpClient();
-                return client;
+        public bool get_client(ref List<TcpClient> clients){
+            if (server.Pending()){
+                clients.Add(server.AcceptTcpClient());
+                return true;
             }
+			return false;
         }
 
         public Message get_message(TcpClient client){

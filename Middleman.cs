@@ -59,19 +59,21 @@ namespace Network{
         public void listen(){
             listener.create_server(Constants.IP);
             bool running = true;
-            clients.Add(listener.get_client());
+            //clients.Add(listener.get_client());
 			//clients.Add(listener.get_client());
-			Console.WriteLine("client ip: {0}", get_ip(clients[0]));
+			//Console.WriteLine("client ip: {0}", get_ip(clients[0]));
 			//Console.WriteLine("client ip: {0}", get_ip(clients[1]));
             //clients.Add(listener.get_client());
 			Message m;
+			listener.start_server();
 			while (running) {
+				listener.get_client(ref clients);
 				List<int> dead_client_indexes = new List<int>(); // Dead Client Indexes could be a good band name?
 				for (int i = 0; i < clients.Count; i++){
-					m = listener.get_message(clients[i]);
-					handle_client(m, clients[i]);
-					
-					if (!clients[i].Connected) {
+					if (clients[i].Connected){
+						m = listener.get_message(clients[i]);
+						handle_client(m, clients[i]);
+					} else {
 						clients[i].Close();
 						dead_client_indexes.Add(i);
 					}
