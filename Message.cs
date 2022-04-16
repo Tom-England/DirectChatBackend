@@ -11,20 +11,22 @@ namespace Network{
         public bool sent;
 		public Status status;
 		public bool created = false;
-		
-		public Message(String _dest, Status _status){
+		public Guid sender_id;	
+		public Message(String _dest, Status _status, Guid _id){
 			destination = _dest;
 			status = _status;
 			sent = false;
 			text = "";
-			created = true;
+			sender_id = _id;
+			// created = true;
 		}
-        public Message(String _text, String _dest){
+        public Message(String _text, String _dest, Guid _id){
             text = _text;
             destination = _dest;
             sent = false;
 			status = Status.message;
 			created = true;
+			sender_id = _id;
         }
     }
 
