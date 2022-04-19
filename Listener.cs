@@ -61,16 +61,21 @@ namespace Network{
             NetworkStream stream = client.GetStream();
 
             int i;
-			if (client.Available > 0){
+			if (stream.CanRead){
+				//Console.WriteLine("Available Bytes: {0}", client.Available);
 				// Loop to receive all the data sent by the client.
-				while((i = stream.Read(bytes, 0, bytes.Length))!=0)
+				/*while((i = stream.Read(bytes, 0, bytes.Length))!=0)
 				{
 					data = mh.from_bytes(bytes);
 					//send_response(stream);
 					//stream.Flush();
+					stream.Flush();
 					break;
-            	}
-				stream.Flush();
+            	}*/
+				do {
+					stream.Read(bytes, 0, bytes.Length);
+				} while (stream.DataAvailable);
+				data = mh.from_bytes(bytes);
 			}
             
 			return data;

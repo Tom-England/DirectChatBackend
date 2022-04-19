@@ -4,6 +4,7 @@ namespace Network{
 		recieve,
 		done,
 		ack,
-		message
+		message,
+		none
 	}
 }

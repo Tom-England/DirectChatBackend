@@ -9,7 +9,7 @@ namespace Network{
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = Constants.IP_SIZE)]
         public String destination;
         public bool sent;
-		public Status status;
+		public Status status = Status.none;
 		public bool created = false;
 		public Guid sender_id;	
 		public Message(String _dest, Status _status, Guid _id){

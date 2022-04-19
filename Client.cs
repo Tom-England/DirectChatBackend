@@ -48,7 +48,7 @@ namespace Network{
 			Console.WriteLine("Sending {0} bytes", data.Length);	
             while (!acked) {
                 stream.Write(data, 0, data.Length);
-                Console.WriteLine("Sent: {0}", message);
+                Console.WriteLine("Sent: {0} To: {1}", message, dest);
 
                 // Receive the TcpServer.response.
 
@@ -73,18 +73,18 @@ namespace Network{
 			Message m = new Message(dest, s, id);
 			MessageHandler mh = new MessageHandler();
 			Byte[] data = mh.get_bytes(m);
-			Console.WriteLine("Sending {0} bytes", data.Length);
+			//Console.WriteLine("Sending {0} bytes", data.Length);
 			while (!acked) {
 				NetworkStream str = c.GetStream();
 				str.Write(data, 0, data.Length);
-				Console.WriteLine("Sent: {0}", m.status);
+				//Console.WriteLine("Sent: {0}", m.status);
 
 				data = new Byte[Constants.MESSAGE_STRUCT_SIZE];
 				Message responseData;
 
 				Int32 bytes = str.Read(data, 0, data.Length);
                 responseData = mh.from_bytes(data);
-                Console.WriteLine("Received: {0}", responseData.status);
+                //Console.WriteLine("Received: {0}", responseData.status);
                 if (responseData.status == Status.ack) { acked = true; }
 				Thread.Sleep(100);
 			}
@@ -99,7 +99,7 @@ namespace Network{
 
 			while (!acked) {
 				stream.Write(data, 0, data.Length);
-				Console.WriteLine("Sent Status: {0}", m.status);
+				//Console.WriteLine("Sent Status: {0}", m.status);
 
 				if (!ack_needed) { acked = true; break; }
 				//Console.WriteLine("Waiting for ACK");
@@ -109,7 +109,7 @@ namespace Network{
 
 				//Int32 bytes = stream.Read(data, 0, data.Length);
                 //responseData = mh.from_bytes(data);
-                Console.WriteLine("Received: {0}", responseData.status);
+                //Console.WriteLine("Received: {0}", responseData.status);
                 if (responseData.status == Status.ack) { acked = true; }
 				Thread.Sleep(100);
 			}
@@ -192,15 +192,15 @@ namespace Network{
 
 			// 3. Read messages until recieve DONE
 			while (data.status != Status.done) {
-				data = read_message_from_stream(c);
+				
 				if (data.created && data.status == Status.message) {
-					//Console.WriteLine("Recieved: {0}", data.text);
+					Console.WriteLine("Recieved: {0}", data.text);
 					if (!dbh.user_exists(data.sender_id)){
 						dbh.add_user("New User", data.sender_id);
 					}
 					dbh.add_message(data.text, data.sender_id);
 				}
-				
+				data = read_message_from_stream(c);
 			}
 			// 4. Exit
 			//Console.WriteLine("Done");
