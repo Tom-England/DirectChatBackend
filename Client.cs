@@ -231,7 +231,7 @@ namespace Network{
 
 				check_messages(c, u.Id);
 
-                dbh.get_all_messages_from_user(u.Id);
+                dbh.print_all_messages();
 
                 // Get a message
                 Console.Write(">>> ");

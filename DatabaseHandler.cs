@@ -107,6 +107,13 @@ namespace Storage
 			}
 		}
 
+		public void print_all_messages(){
+			string sql = "SELECT message_text, sender_id FROM messages;";
+			SqliteDataReader reader = run_reader(sql);
+			while (reader.Read()){
+				Console.WriteLine("{0} : {1}", reader["sender_id"], reader["message_text"]);
+			}
+		}
 		public void get_all_messages_from_user(Guid id){
 			string s_id = id.ToString();
 			string sql = "SELECT * FROM messages WHERE sender_id='"+s_id+"'";
