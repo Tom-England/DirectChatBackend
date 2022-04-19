@@ -84,30 +84,7 @@ namespace Network{
 						if (j != i) { new_client_list.Add(clients[j]); }
 					}
 					clients = new_client_list;
-				}
-				/*LinkedListNode<Message> node=message_stack.First;
-				while(node != null){
-					m = node.Value;
-					LinkedListNode<Message> next = node.Next;
-					if (!m.sent){
-						// Check if desination client is connected then forward
-						foreach (TcpClient c in clients){
-							if (get_ip(c) == m.destination) {
-								// Send the message
-								// Remove the message from the list
-								Console.WriteLine("Removing message {0} going to IP {1}", m.text, m.destination);
-								mm_client.send(m, c);
-								m.sent = true;
-								message_stack.Remove(node);
-
-							}
-						}
-						//Console.WriteLine(m.text);
-					}
-					node = next;
-				}*/
-			}
-            
+				} 
             listener.stop_server();            
         }
     }
