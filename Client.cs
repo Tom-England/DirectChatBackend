@@ -227,12 +227,15 @@ namespace Network{
 			dbh.setup();
 			setup_id(u);
             //dbh.add_user(u.Name, u.Id);
+			Console.Write("Target >>> ");
+			string target = Console.ReadLine();
+			Console.WriteLine();
 			while (msg != "quit"){
 
 				check_messages(c, u.Id);
 
                 dbh.print_all_messages();
-
+				
                 // Get a message
                 Console.Write(">>> ");
                 msg = Console.ReadLine();
@@ -257,10 +260,10 @@ namespace Network{
 					
 					if (split){
 						foreach(string str in msg_segments){
-							c.send(str, Constants.IP, u.Id);
+							c.send(str, target, u.Id);
 						}
 					} else {
-						c.send(msg, Constants.IP, u.Id);
+						c.send(msg, target, u.Id);
 					}
 				//}
 				//else { break; }
