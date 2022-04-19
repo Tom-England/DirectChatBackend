@@ -85,7 +85,8 @@ namespace Network{
 					}
 					clients = new_client_list;
 				} 
+			}
             listener.stop_server();            
-        }
-    }
+    	}
+	}
 }
