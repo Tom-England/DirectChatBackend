@@ -5,7 +5,20 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 namespace Network{
-    class Client{
+
+	interface IClient{
+		void create_client(String server);
+		void close_client();
+		void send(String message, String dest, Guid _id);
+		void send(Message m, TcpClient c);
+		void send_status(Status s, String dest, TcpClient c, Guid id);
+		void send_status(Status s, TcpClient c, Guid id, bool ack_needed = true);
+		Message read_message_from_stream(Client c);
+		Message read_message_from_stream(NetworkStream s);
+		void check_messages(Client c, Guid id);
+		void run_client();
+	}
+    class Client:IClient{
 
         Storage.DatabaseHandler dbh = new Storage.DatabaseHandler();
         TcpClient client;
@@ -208,24 +221,29 @@ namespace Network{
 
 		}
 
-		void setup_id(User u){
+		void setup_id(User u, cryptography.CryptoHelper c){
 			Guid temp_id = dbh.get_account_id();	
 			if (temp_id != Guid.Empty) {
+				c.AES.IV = dbh.get_iv();
+				c.AES.Key = dbh.get_key();
 				u.Id = temp_id;
 			} else {
-				dbh.register(u.Id);
+				dbh.register(u.Id, c.AES.Key, c.AES.IV);
 			}
 		}
 
         public void run_client(){
             User u = new User("user");
 			Client c = new Client();
+			cryptography.CryptoHelper crypto = new cryptography.CryptoHelper();
             c.create_client(Constants.IP);
             string msg = "";
             //dbh.create();
             dbh.connect();
 			dbh.setup();
-			setup_id(u);
+			setup_id(u, crypto);
+			Console.WriteLine("IV: {0} {1}", BitConverter.ToString(crypto.AES.IV), crypto.AES.IV.Length);
+			Console.WriteLine("Key: {0} {1}", BitConverter.ToString(crypto.AES.Key), crypto.AES.Key.Length);
             //dbh.add_user(u.Name, u.Id);
 			Console.Write("Target >>> ");
 			string target = Console.ReadLine();

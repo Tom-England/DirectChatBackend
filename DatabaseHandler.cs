@@ -29,7 +29,9 @@ namespace Storage
 			string account = @"CREATE TABLE if not exists account
 			(
 			 	account_id VARCHAR(40) PRIMARY KEY NOT NULL,
-				password_hash CHAR(20)
+				password_hash BINARY(256),
+				key CHAR(32),
+				iv CHAR(16)
 			);";
 			run_command(messages);
 			run_command(users);
@@ -58,9 +60,11 @@ namespace Storage
 			return reader;
 		}
 		
-		public void register(Guid id) {
+		public void register(Guid id, byte[] key, byte[] iv) {
 			string s_id = id.ToString();
-			string sql = "INSERT INTO account(account_id) VALUES ('"+s_id+"');";
+			string s_key = Convert.ToBase64String(key);
+			string s_iv = Convert.ToBase64String(iv);
+			string sql = "INSERT INTO account(account_id, key, iv) VALUES ('"+s_id+"','"+s_key+"','"+s_iv+"');";
 			run_command(sql);
 		}
 
@@ -74,6 +78,32 @@ namespace Storage
 				}
 			}
 			return id;
+		}
+		public byte[] get_key(){
+			string sql = "SELECT key FROM account";
+			SqliteDataReader reader = run_reader(sql);
+			string s_key;
+			byte[] key = new byte[32];
+			if (reader.HasRows) {
+				while (reader.Read()){
+					s_key = reader["key"].ToString();
+					key = Convert.FromBase64String(s_key);
+				}
+			}
+			return key;
+		}
+		public byte[] get_iv(){
+			string sql = "SELECT iv FROM account";
+			SqliteDataReader reader = run_reader(sql);
+			string s_iv;
+			byte[] iv = new byte[16];
+			if (reader.HasRows) {
+				while (reader.Read()){
+					s_iv = reader["iv"].ToString();
+					iv = Convert.FromBase64String(s_iv);
+				}
+			}
+			return iv;
 		}
 		public bool user_exists(Guid id){
 			string s_id = id.ToString();
