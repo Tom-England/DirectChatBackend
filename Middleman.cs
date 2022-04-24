@@ -8,6 +8,7 @@ namespace Network{
         List<TcpClient> clients = new List<TcpClient>();
         Listener listener;
         LinkedList<Message> message_stack = new LinkedList<Message>();
+		LinkedList<User.UserTransferable> user_stack = new LinkedList<User.UserTransferable>();
 		User u = new User("DNS");
         public Middleman(){
             listener = new Listener();
@@ -29,6 +30,16 @@ namespace Network{
 			while (true) {
 				Message m = listener.get_message(c);
 				switch (m.status){
+					case Status.handshake:
+						mm_client.send_status(Status.ack, c, u.Id, false);
+						User.UserTransferable usr = listener.get_user(c);
+						while (!usr.created) {
+							usr = listener.get_user(c);
+						}
+						user_stack.AddLast(usr);
+						Console.WriteLine("Hello {0}", usr.name);
+						mm_client.send_status(Status.ack, c, u.Id, false);
+						break;
 					case Status.message:
 						//Console.WriteLine("Message");
 						Console.WriteLine("Recieved: {0}", m.text);
@@ -78,6 +89,7 @@ namespace Network{
 			List<Thread> threads = new List<Thread>();
 			while (running) {
 				if (listener.get_client(ref clients)){
+					// Start thread
 					threads.Add(new Thread(handle_client));
 					threads.Last().Start(clients.Last());
 					Console.WriteLine("Connected: {0}", get_ip(clients.Last()));

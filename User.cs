@@ -15,23 +15,23 @@ namespace Network{
 			get { return id; }
 			set { id = value; }
 		}
+		public User(){
+
+		}
 		public User(string _name){
 			id = Guid.NewGuid();
 			Name = _name;
 		}
-		private byte[] key;
-		public byte[] Key{
-			get { return key; }
-			set { key = value; }
-		}
 
 		public struct UserTransferable{
 			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = Constants.MESSAGE_SIZE)]
-			string name;
-			Guid id;
-			byte[] key;
-			byte[] iv;
-
+			public string name;
+			public Guid id;
+			[MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+			public byte[] key;
+			[MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+			public byte[] iv;
+			public bool created = false;
 			public UserTransferable(string _name, Guid _id, byte[] _key, byte[] _iv){
 				name = _name;
 				id = _id;

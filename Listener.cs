@@ -45,7 +45,22 @@ namespace Network{
             }
 			return false;
         }
+		public User.UserTransferable get_user(TcpClient c){
+			User u = new User();
 
+			Byte[] bytes = new Byte[Constants.USER_STRUCT_SIZE];
+			User.UserTransferable ut = new User.UserTransferable();
+
+			NetworkStream stream = c.GetStream();
+
+			if (stream.CanRead) {
+				do {
+					stream.Read(bytes, 0, bytes.Length);
+				} while (stream.DataAvailable);
+				ut = u.from_bytes(bytes);
+			}
+			return ut;
+		}
         public Message get_message(TcpClient client){
             
 			//Console.WriteLine("reading message");
@@ -60,7 +75,6 @@ namespace Network{
             // Get a stream object for reading and writing
             NetworkStream stream = client.GetStream();
 
-            int i;
 			if (stream.CanRead){
 				//Console.WriteLine("Available Bytes: {0}", client.Available);
 				// Loop to receive all the data sent by the client.

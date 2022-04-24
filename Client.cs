@@ -50,6 +50,22 @@ namespace Network{
             client.Close();
         }
 
+		private void send_user(User.UserTransferable u, User usr, TcpClient c){
+			bool acked = false;
+			MessageHandler mh = new MessageHandler();
+			byte[] u_data = usr.get_bytes(u);
+			Console.WriteLine("Sending {0} bytes", u_data.Length);
+			NetworkStream stream = c.GetStream();
+			while (!acked) {
+				stream.Write(u_data, 0, u_data.Length);
+				Console.WriteLine("Sent: {0}", u.name);
+				Byte[] data = new Byte[Constants.MESSAGE_STRUCT_SIZE];
+				stream.Read(data, 0, data.Length);
+				Message responseData = mh.from_bytes(data);
+				if (responseData.status == Status.ack) {acked = true;} else {Console.WriteLine("No Ack");}
+				Thread.Sleep(100);
+			}
+		}
         public void send(String message, String dest, Guid _id){
             bool acked = false;
 
@@ -112,7 +128,7 @@ namespace Network{
 
 			while (!acked) {
 				stream.Write(data, 0, data.Length);
-				//Console.WriteLine("Sent Status: {0}", m.status);
+				Console.WriteLine("Sent Status: {0}", m.status);
 
 				if (!ack_needed) { acked = true; break; }
 				//Console.WriteLine("Waiting for ACK");
@@ -232,19 +248,27 @@ namespace Network{
 			}
 		}
 
+		public void handshake(TcpClient c, User u, cryptography.CryptoHelper crypto){
+			send_status(Status.handshake, c, u.Id);
+			User.UserTransferable user = new User.UserTransferable(u.Name, u.Id, crypto.AES.Key, crypto.AES.IV);
+			user.created = true;
+			send_user(user, u, c);
+			Console.WriteLine("Handshake Done");
+		}
+
         public void run_client(){
             User u = new User("user");
 			Client c = new Client();
+
 			cryptography.CryptoHelper crypto = new cryptography.CryptoHelper();
-            c.create_client(Constants.IP);
-            string msg = "";
-            //dbh.create();
-            dbh.connect();
+			dbh.connect();
 			dbh.setup();
 			setup_id(u, crypto);
-			Console.WriteLine("IV: {0} {1}", BitConverter.ToString(crypto.AES.IV), crypto.AES.IV.Length);
-			Console.WriteLine("Key: {0} {1}", BitConverter.ToString(crypto.AES.Key), crypto.AES.Key.Length);
-            //dbh.add_user(u.Name, u.Id);
+
+            c.create_client(Constants.IP);
+			handshake(c.client, u, crypto);
+
+            string msg = "";
 			Console.Write("Target >>> ");
 			string target = Console.ReadLine();
 			Console.WriteLine();
@@ -272,7 +296,7 @@ namespace Network{
 						int start = 0;
 						for (int i = 0; i <= msg.Length / Constants.MESSAGE_SIZE; i++){
 							msg_segments.Add(split_string(msg, start, start + Constants.MESSAGE_SIZE));
-							start += 161;
+							start += Constants.MESSAGE_SIZE + 1;
 						}
 					}
 					
