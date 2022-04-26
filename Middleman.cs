@@ -30,6 +30,16 @@ namespace Network{
 			while (true) {
 				Message m = listener.get_message(c);
 				switch (m.status){
+					case Status.request:
+						Console.WriteLine("request for {0}", m.sender_id);
+						User.UserTransferable uT = new User.UserTransferable();
+						foreach (User.UserTransferable userT in user_stack){
+							if (userT.id == m.sender_id) {
+								uT = userT;
+							}
+						}
+						mm_client.send_user(uT, u, c);
+						break;
 					case Status.handshake:
 						mm_client.send_status(Status.ack, c, u.Id, false);
 						User.UserTransferable usr = listener.get_user(c);

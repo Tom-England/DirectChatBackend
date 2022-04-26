@@ -6,6 +6,7 @@ namespace Network{
 		done,
 		ack,
 		message,
-		none
+		none,
+		request
 	}
 }

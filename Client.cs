@@ -50,7 +50,7 @@ namespace Network{
             client.Close();
         }
 
-		private void send_user(User.UserTransferable u, User usr, TcpClient c){
+		public void send_user(User.UserTransferable u, User usr, TcpClient c){
 			bool acked = false;
 			MessageHandler mh = new MessageHandler();
 			byte[] u_data = usr.get_bytes(u);
@@ -246,6 +246,7 @@ namespace Network{
 			} else {
 				dbh.register(u.Id, c.AES.Key, c.AES.IV);
 			}
+			Console.WriteLine("ID: {0}", u.Id);
 		}
 
 		public void handshake(TcpClient c, User u, cryptography.CryptoHelper crypto){
@@ -254,6 +255,15 @@ namespace Network{
 			user.created = true;
 			send_user(user, u, c);
 			Console.WriteLine("Handshake Done");
+		}
+
+		public User.UserTransferable request_user(Guid target, TcpClient c){
+			User.UserTransferable details;
+			Message m = new Message("0.0.0.0", Status.request, target);
+			send(m, c);
+			Listener l = new Listener();
+			details = l.get_user(c);
+			return details;
 		}
 
         public void run_client(){
