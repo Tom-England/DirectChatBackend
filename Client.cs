@@ -227,7 +227,8 @@ namespace Network{
 					if (!dbh.user_exists(data.sender_id)){
 						dbh.add_user("New User", data.sender_id);
 					}
-					//dbh.add_message(data.text, data.sender_id);
+					string data_text = BitConverter.ToString(data.text);
+					dbh.add_message(data_text, data.sender_id);
 				}
 				data = read_message_from_stream(c);
 			}
