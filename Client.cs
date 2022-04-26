@@ -102,7 +102,7 @@ namespace Network{
 			Message m = new Message(dest, s, id);
 			MessageHandler mh = new MessageHandler();
 			Byte[] data = mh.get_bytes(m);
-			//Console.WriteLine("Sending {0} bytes", data.Length);
+			Console.WriteLine("Sending {0} bytes", data.Length);
 			while (!acked) {
 				NetworkStream str = c.GetStream();
 				str.Write(data, 0, data.Length);
@@ -125,7 +125,7 @@ namespace Network{
 			Message m = new Message("-1", s, id);
 			MessageHandler mh = new MessageHandler();
 			Byte[] data = mh.get_bytes(m);
-
+			Console.WriteLine("Sending {0} bytes", data.Length);
 			while (!acked) {
 				stream.Write(data, 0, data.Length);
 				Console.WriteLine("Sent Status: {0}", m.status);
@@ -298,7 +298,7 @@ namespace Network{
 			Console.WriteLine();
 			while (msg != "quit"){
 
-				check_messages(c, u.Id);
+				//check_messages(c, u.Id);
 
                 dbh.print_all_messages();
 				
@@ -310,7 +310,7 @@ namespace Network{
                 bool split = false;
                 //Console.WriteLine("String length: " + msg.Length);
 
-				send_status(Status.send, c.client, u.Id, true);
+				//send_status(Status.send, c.client, u.Id, true);
 				//Console.WriteLine("Send send status");
 				//Message data = read_message_from_stream(c);
 				//Console.WriteLine(data.status);
@@ -327,12 +327,12 @@ namespace Network{
 					if (split){
 						foreach(string str in msg_segments){
 							byte[] enc_str = crypto.encrypt(str, key, uT.iv);
-							//c.send(enc_str, target, u.Id);
+							c.send(enc_str, target, u.Id);
 						}
 					} else {
 						byte[] enc_str = crypto.encrypt(msg, key, uT.iv);
 						Console.WriteLine("Length of msg: {0}", enc_str.Length);
-						//c.send(enc_str, target, u.Id);
+						c.send(enc_str, target, u.Id);
 					}
 				//}
 				//else { break; }
