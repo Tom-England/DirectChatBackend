@@ -1,8 +1,42 @@
 using System.Security.Cryptography;
+using Elliptic;
 
 namespace cryptography{
 	class CryptoHelper{
+		
+		public byte[] bytes;
+		public byte[] private_key;
+		public byte[] public_key;
 		public Aes AES = Aes.Create();
+
+		public void new_ecdh(){
+			bytes = new byte[32];
+			RandomNumberGenerator.Create().GetBytes(bytes);
+			generate_keys_from_bytes();
+		}
+
+		public void generate_keys_from_bytes(){
+			private_key = Curve25519.ClampPrivateKey(bytes);
+			public_key = Curve25519.GetPublicKey(bytes);
+		}
+
+		public byte[] generate_shared_secret(byte[] alice_key, byte[] bob_key){
+			return Curve25519.GetSharedSecret(alice_key, bob_key);
+		}
+		
+
+		public void print_keys(){
+			Console.WriteLine("Private: {0}\nPublic: {1}", BitConverter.ToString(private_key), BitConverter.ToString(public_key));
+		}
+
+		/***
+		*** Takes in the public key of bob and returns the shared secret
+		***/
+		public byte[] get_shared_secret(byte[] bob_key){
+			byte[] shared_secret = new byte[32];
+			return shared_secret;
+		}
+
 
 		public byte[] encrypt(string text, byte[] key, byte[] iv) {
 			byte[] cipher;

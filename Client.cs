@@ -241,10 +241,12 @@ namespace Network{
 			Guid temp_id = dbh.get_account_id();	
 			if (temp_id != Guid.Empty) {
 				c.AES.IV = dbh.get_iv();
-				c.AES.Key = dbh.get_key();
+				c.bytes = dbh.get_key();
+				c.generate_keys_from_bytes();
 				u.Id = temp_id;
 			} else {
-				dbh.register(u.Id, c.AES.Key, c.AES.IV);
+				c.new_ecdh();
+				dbh.register(u.Id, c.bytes, c.AES.IV);
 			}
 			Console.WriteLine("ID: {0}", u.Id);
 		}
@@ -263,6 +265,7 @@ namespace Network{
 			send(m, c);
 			Listener l = new Listener();
 			details = l.get_user(c);
+			Console.WriteLine(BitConverter.ToString(details.key));
 			return details;
 		}
 
@@ -271,12 +274,20 @@ namespace Network{
 			Client c = new Client();
 
 			cryptography.CryptoHelper crypto = new cryptography.CryptoHelper();
+
 			dbh.connect();
 			dbh.setup();
 			setup_id(u, crypto);
 
             c.create_client(Constants.IP);
 			handshake(c.client, u, crypto);
+
+
+			Guid pi = Guid.Parse("26056eb8-e6fc-4b99-8a85-384665d40023");
+			User.UserTransferable uT = request_user(pi, c.client);
+			//crypto.AES.Key = crypto.create_shared_secret(uT.key);
+
+			crypto.print_keys();
 
             string msg = "";
 			Console.Write("Target >>> ");

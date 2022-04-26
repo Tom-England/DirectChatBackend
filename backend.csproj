@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Curve25519" Version="1.0.1" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.4" />
   </ItemGroup>
 
