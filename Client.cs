@@ -9,7 +9,7 @@ namespace Network{
 	interface IClient{
 		void create_client(String server);
 		void close_client();
-		void send(String message, String dest, Guid _id);
+		void send(byte[] message, String dest, Guid _id);
 		void send(Message m, TcpClient c);
 		void send_status(Status s, String dest, TcpClient c, Guid id);
 		void send_status(Status s, TcpClient c, Guid id, bool ack_needed = true);
@@ -66,7 +66,7 @@ namespace Network{
 				Thread.Sleep(100);
 			}
 		}
-        public void send(String message, String dest, Guid _id){
+        public void send(byte[] message, String dest, Guid _id){
             bool acked = false;
 
             Message m = new Message(message, dest, _id);
@@ -227,7 +227,7 @@ namespace Network{
 					if (!dbh.user_exists(data.sender_id)){
 						dbh.add_user("New User", data.sender_id);
 					}
-					dbh.add_message(data.text, data.sender_id);
+					//dbh.add_message(data.text, data.sender_id);
 				}
 				data = read_message_from_stream(c);
 			}
@@ -288,6 +288,8 @@ namespace Network{
 			//crypto.AES.Key = crypto.create_shared_secret(uT.key);
 
 			crypto.print_keys();
+			
+			byte[] key = crypto.generate_shared_secret(crypto.private_key, uT.key);
 
             string msg = "";
 			Console.Write("Target >>> ");
@@ -323,10 +325,13 @@ namespace Network{
 					
 					if (split){
 						foreach(string str in msg_segments){
-							c.send(str, target, u.Id);
+							byte[] enc_str = crypto.encrypt(str, key, uT.iv);
+							//c.send(enc_str, target, u.Id);
 						}
 					} else {
-						c.send(msg, target, u.Id);
+						byte[] enc_str = crypto.encrypt(msg, key, uT.iv);
+						Console.WriteLine("Length of msg: {0}", enc_str.Length);
+						//c.send(enc_str, target, u.Id);
 					}
 				//}
 				//else { break; }
