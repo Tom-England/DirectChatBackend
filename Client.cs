@@ -227,7 +227,7 @@ namespace Network{
 					if (!dbh.user_exists(data.sender_id)){
 						dbh.add_user("New User", data.sender_id);
 					}
-					string data_text = BitConverter.ToString(data.text);
+					string data_text = Convert.ToBase64String(data.text);
 					dbh.add_message(data_text, data.sender_id);
 				}
 				data = read_message_from_stream(c);
@@ -287,7 +287,7 @@ namespace Network{
 			handshake(c.client, u, crypto);
 
 
-			Guid pi = Guid.Parse("26056eb8-e6fc-4b99-8a85-384665d40023");
+			Guid pi = Guid.Parse("b0c9bbbf-e781-47cd-9799-311511599027");
 			User.UserTransferable uT = request_user(pi, c.client);
 			//crypto.AES.Key = crypto.create_shared_secret(uT.key);
 
