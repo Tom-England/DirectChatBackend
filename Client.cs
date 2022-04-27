@@ -326,11 +326,11 @@ namespace Network{
 					
 					if (split){
 						foreach(string str in msg_segments){
-							byte[] enc_str = crypto.encrypt(str, key, uT.iv);
+							byte[] enc_str = crypto.encrypt(str.PadRight(Constants.MESSAGE_SIZE-msg.Length), key, uT.iv);
 							c.send(enc_str, target, u.Id);
 						}
 					} else {
-						byte[] enc_str = crypto.encrypt(msg, key, uT.iv);
+						byte[] enc_str = crypto.encrypt(msg.PadRight(Constants.MESSAGE_SIZE-msg.Length), key, uT.iv);
 						Console.WriteLine("Length of msg: {0}", enc_str.Length);
 						c.send(enc_str, target, u.Id);
 					}
