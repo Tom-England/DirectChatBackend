@@ -137,10 +137,12 @@ namespace Storage
 			}
 		}
 
-		public void print_all_messages(){
+		public void print_all_messages(byte[] key){
 			string sql = "SELECT message_text, sender_id FROM messages;";
 			SqliteDataReader reader = run_reader(sql);
+			cryptography.CryptoHelper c = new cryptography.CryptoHelper();
 			while (reader.Read()){
+				string text = c.decrypt(reader["message_text"], key, reader["iv"]);
 				Console.WriteLine("{0} : {1}", reader["sender_id"], reader["message_text"]);
 			}
 		}

@@ -303,7 +303,7 @@ namespace Network{
 
 				check_messages(c, u.Id);
 
-                dbh.print_all_messages();
+                dbh.print_all_messages(key, crypto.AES.IV);
 				
                 // Get a message
                 Console.Write(">>> ");
