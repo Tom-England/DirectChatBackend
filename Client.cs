@@ -286,19 +286,20 @@ namespace Network{
             c.create_client(Constants.IP);
 			handshake(c.client, u, crypto);
 
-
-			Guid pi = Guid.Parse("90fd3a2d-5d5f-4729-98f2-f3092518f220");
-			User.UserTransferable uT = request_user(pi, c.client);
-			//crypto.AES.Key = crypto.create_shared_secret(uT.key);
-
-			crypto.print_keys();
-			
-			byte[] key = crypto.generate_shared_secret(crypto.private_key, uT.key);
-
             string msg = "";
 			Console.Write("Target >>> ");
 			string target = Console.ReadLine();
+			Console.Write("Target Guid >>> ");
+			Guid guid = Guid.Parse(Console.ReadLine());
 			Console.WriteLine();
+
+			User.UserTransferable uT = request_user(guid, c.client);
+			//crypto.AES.Key = crypto.create_shared_secret(uT.key);
+
+			//crypto.print_keys();
+			
+			byte[] key = crypto.generate_shared_secret(crypto.private_key, uT.key);
+
 			while (msg != "quit"){
 
 				check_messages(c, u.Id);

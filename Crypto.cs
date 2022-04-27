@@ -40,9 +40,11 @@ namespace cryptography{
 
 
 		public byte[] encrypt(string text, byte[] key, byte[] iv) {
+			Console.WriteLine("Starting Encrypt");
 			using (Aes AES_enc = Aes.Create()){
 				AES_enc.IV = iv;
 				AES_enc.Key = key;
+				AES_enc.Padding = PaddingMode.PKCS7;
 				/*
 				// Create an encryptor to perform the stream transform.
                 ICryptoTransform encryptor = AES_enc.CreateEncryptor(AES_enc.Key, AES_enc.IV);
@@ -63,15 +65,16 @@ namespace cryptography{
 				using (var encryptor = AES_enc.CreateEncryptor(key, iv))
 				{
 					var plainText = Encoding.UTF8.GetBytes(text);
-					var cipherText = encryptor
-						.TransformFinalBlock(plainText, 0, plainText.Length);
-
+					var cipherText = encryptor.TransformFinalBlock(plainText, 0, plainText.Length);
+					Console.WriteLine("Done");
+					Console.WriteLine("Length {0} bytes", cipherText.Length);
 					return cipherText;
 				}
             }
 		}
 
 		public string decrypt(byte[] cipher, byte[] key, byte[] iv){
+			Console.WriteLine("Trying to decrypt message of length {0}", cipher.Length);
 			string text;
 			// Create an Aes object
             // with the specified key and IV.
@@ -79,6 +82,7 @@ namespace cryptography{
             {
                 aes_dec.Key = key;
                 aes_dec.IV = iv;
+				aes_dec.Padding = PaddingMode.PKCS7;
 				/*
                 // Create a decryptor to perform the stream transform.
                 ICryptoTransform decryptor = aes_dec.CreateDecryptor(aes_dec.Key, aes_dec.IV);
@@ -100,8 +104,7 @@ namespace cryptography{
 
 				using (var encryptor = aes_dec.CreateDecryptor(key, iv))
 				{
-					var decryptedBytes = encryptor
-						.TransformFinalBlock(cipher, 0, cipher.Length);
+					var decryptedBytes = encryptor.TransformFinalBlock(cipher, 0, cipher.Length);
 					text = BitConverter.ToString(decryptedBytes);
 				}
             }
