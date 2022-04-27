@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Elliptic;
+using System.Text;
 
 namespace cryptography{
 	class CryptoHelper{
@@ -39,10 +40,10 @@ namespace cryptography{
 
 
 		public byte[] encrypt(string text, byte[] key, byte[] iv) {
-			byte[] cipher;
 			using (Aes AES_enc = Aes.Create()){
 				AES_enc.IV = iv;
 				AES_enc.Key = key;
+				/*
 				// Create an encryptor to perform the stream transform.
                 ICryptoTransform encryptor = AES_enc.CreateEncryptor(AES_enc.Key, AES_enc.IV);
 
@@ -58,11 +59,16 @@ namespace cryptography{
                         }
                         cipher = ms_encrypt.ToArray();
                     }
-                }
-            }
+                }*/
+				using (var encryptor = AES_enc.CreateEncryptor(key, iv))
+				{
+					var plainText = Encoding.UTF8.GetBytes(text);
+					var cipherText = encryptor
+						.TransformFinalBlock(plainText, 0, plainText.Length);
 
-            // Return the encrypted bytes from the memory stream.
-            return cipher;
+					return cipherText;
+				}
+            }
 		}
 
 		public string decrypt(byte[] cipher, byte[] key, byte[] iv){
@@ -73,7 +79,7 @@ namespace cryptography{
             {
                 aes_dec.Key = key;
                 aes_dec.IV = iv;
-
+				/*
                 // Create a decryptor to perform the stream transform.
                 ICryptoTransform decryptor = aes_dec.CreateDecryptor(aes_dec.Key, aes_dec.IV);
 
@@ -90,7 +96,14 @@ namespace cryptography{
                             text = sr_decrypt.ReadToEnd();
                         }
                     }
-                }
+                }*/
+
+				using (var encryptor = aes_dec.CreateDecryptor(key, iv))
+				{
+					var decryptedBytes = encryptor
+						.TransformFinalBlock(cipher, 0, cipher.Length);
+					text = BitConverter.ToString(decryptedBytes);
+				}
             }
 
             return text;
