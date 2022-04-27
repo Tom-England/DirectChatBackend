@@ -151,6 +151,7 @@ namespace Network{
             MessageHandler mh = new MessageHandler();
             byte[] data = mh.get_bytes(m);
 
+			Console.WriteLine("Sending {0} bytes", data.Length);
             while (!acked) {
                 stream.Write(data, 0, data.Length);
                 //Console.WriteLine("Sent: {0}", m.text);
@@ -208,7 +209,7 @@ namespace Network{
 		}
 
 		public void check_messages(Client c, Guid id){
-			//Console.WriteLine("Checking for messages");
+			Console.WriteLine("Checking for messages");
 			// 1. Send message to mm asking for messages
 			send_status(Status.recieve, Constants.IP, c.client, id);
 			//Console.WriteLine("Status Sent");
@@ -221,7 +222,7 @@ namespace Network{
 
 			// 3. Read messages until recieve DONE
 			while (data.status != Status.done) {
-				
+				Console.WriteLine("Received {0}", data.status);
 				if (data.created && data.status == Status.message) {
 					Console.WriteLine("Recieved: {0}", data.text);
 					if (!dbh.user_exists(data.sender_id)){

@@ -61,7 +61,7 @@ namespace Network{
 						mm_client.send_status(Status.ack, c, u.Id, false);
 						break;
 					case Status.recieve:
-						//Console.WriteLine("Recieve");
+						Console.WriteLine("Recieve");
 						mm_client.send_status(Status.ack, c, u.Id, false);
 
 						LinkedListNode<Message> node=message_stack.First;
@@ -71,7 +71,7 @@ namespace Network{
 							LinkedListNode<Message> next = node.Next;
 							if (get_ip(c) == message.destination) {
 								// Message is to be sent
-								Console.WriteLine("Sending Message");
+								Console.WriteLine("Sending Message with status {0}", message.status);
 								mm_client.send(message, c);
 								message_stack.Remove(node);
 							} else {
