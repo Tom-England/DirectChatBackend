@@ -4,7 +4,7 @@ using System.Runtime.InteropServices; // For converting the message to a byte ar
 namespace Network{
     struct Message{
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 180)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 160)]
         public byte[] text;
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = Constants.IP_SIZE)]
         public String destination;
@@ -16,7 +16,7 @@ namespace Network{
 			destination = _dest;
 			status = _status;
 			sent = false;
-			text = new byte[180];
+			text = new byte[160];
 			sender_id = _id;
 		}
         public Message(byte[] _text, String _dest, Guid _id){

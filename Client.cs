@@ -265,8 +265,11 @@ namespace Network{
 			Message m = new Message("0.0.0.0", Status.request, target);
 			send(m, c);
 			Listener l = new Listener();
-			details = l.get_user(c);
-			Console.WriteLine(BitConverter.ToString(details.key));
+			do{
+				details = l.get_user(c);
+			}while (!details.created);
+			send_status(Status.ack, c, target, false);
+			//Console.WriteLine(BitConverter.ToString(details.key));
 			return details;
 		}
 
@@ -298,7 +301,7 @@ namespace Network{
 			Console.WriteLine();
 			while (msg != "quit"){
 
-				//check_messages(c, u.Id);
+				check_messages(c, u.Id);
 
                 dbh.print_all_messages();
 				
