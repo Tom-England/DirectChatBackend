@@ -18,7 +18,7 @@ namespace cryptography{
 
 		public void generate_keys_from_bytes(){
 			private_key = Curve25519.ClampPrivateKey(bytes);
-			public_key = Curve25519.GetPublicKey(bytes);
+			public_key = Curve25519.GetPublicKey(private_key);
 		}
 
 		public byte[] generate_shared_secret(byte[] alice_key, byte[] bob_key){
@@ -40,6 +40,7 @@ namespace cryptography{
 
 		public byte[] encrypt(string text, byte[] key, byte[] iv) {
 			Console.WriteLine("Starting Encrypt");
+			Console.WriteLine("Key: {0}\nIV: {1}", BitConverter.ToString(key), BitConverter.ToString(iv));
 			using (Aes AES_enc = Aes.Create()){
 				AES_enc.IV = iv;
 				AES_enc.Key = key;
@@ -74,6 +75,7 @@ namespace cryptography{
 
 		public string decrypt(byte[] cipher, byte[] key, byte[] iv){
 			Console.WriteLine("Trying to decrypt message of length {0}", cipher.Length);
+			Console.WriteLine("Key: {0}\nIV: {1}", BitConverter.ToString(key), BitConverter.ToString(iv));
 			string text;
 			// Create an Aes object
             // with the specified key and IV.

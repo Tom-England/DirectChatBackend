@@ -72,6 +72,7 @@ namespace Network{
 							if (get_ip(c) == message.destination) {
 								// Message is to be sent
 								Console.WriteLine("Sending Message with status {0}", message.status);
+								Console.WriteLine("c: {0}", message.sender_id);
 								mm_client.send(message, c);
 								message_stack.Remove(node);
 							} else {
@@ -87,6 +88,7 @@ namespace Network{
 			
 		}
         public void listen(){
+			Console.WriteLine("ID: {0}", u.Id);
             listener.create_server(Constants.IP);
             bool running = true;
             //clients.Add(listener.get_client());

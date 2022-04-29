@@ -239,12 +239,13 @@ namespace Network{
 
 			// Handle Users
 			foreach (Message message in received_stack){
-				if (!dbh.user_exists(data.sender_id)){
-						User.UserTransferable user_info = request_user(data.sender_id, c.client);
+				if (!dbh.user_exists(message.sender_id)){
+						Console.WriteLine("Requesting: {0}", message.sender_id);
+						User.UserTransferable user_info = request_user(message.sender_id, c.client);
 						dbh.add_user(user_info.name, user_info.id, user_info.key);
 					}
-				string data_text = Convert.ToBase64String(data.text);
-				dbh.add_message(data_text, data.sender_id);
+				string data_text = Convert.ToBase64String(message.text);
+				dbh.add_message(data_text, message.sender_id);
 			}
 		}
 
@@ -308,9 +309,11 @@ namespace Network{
 
 			crypto.print_keys();
 			
+			Console.WriteLine("uT Pk: {0}", BitConverter.ToString(uT.key));
+
 			byte[] key = crypto.generate_shared_secret(crypto.private_key, uT.key);
 
-			//Console.WriteLine("Shared Secret: {0}", BitConverter.ToString(key));
+			Console.WriteLine("Shared Secret: {0}", BitConverter.ToString(key));
 
 			while (msg != "quit"){
 
