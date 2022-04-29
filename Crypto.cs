@@ -40,6 +40,7 @@ namespace cryptography{
 
 		public byte[] encrypt(string text, byte[] key, byte[] iv) {
 			Console.WriteLine("Starting Encrypt");
+			Console.WriteLine("Length of string: {0}", text.Length);
 			Console.WriteLine("Key: {0}\nIV: {1}", BitConverter.ToString(key), BitConverter.ToString(iv));
 			using (Aes AES_enc = Aes.Create()){
 				AES_enc.IV = iv;

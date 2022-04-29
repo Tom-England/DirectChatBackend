@@ -17,6 +17,9 @@ namespace Network{
             } else if (args[0] == "dbtest"){
 				Storage.DatabaseHandler dbh = new Storage.DatabaseHandler();
 				dbh.test();
+			} else if (args[0] == "enctest"){
+				Tests.Test t = new Tests.Test();
+				t.main();
 			}
         }
     }
