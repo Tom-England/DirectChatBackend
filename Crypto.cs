@@ -24,7 +24,6 @@ namespace cryptography{
 		public byte[] generate_shared_secret(byte[] alice_key, byte[] bob_key){
 			return Curve25519.GetSharedSecret(alice_key, bob_key);
 		}
-		
 
 		public void print_keys(){
 			Console.WriteLine("Private: {0}\nPublic: {1}", BitConverter.ToString(private_key), BitConverter.ToString(public_key));
@@ -105,7 +104,7 @@ namespace cryptography{
 				using (var encryptor = aes_dec.CreateDecryptor(key, iv))
 				{
 					var decryptedBytes = encryptor.TransformFinalBlock(cipher, 0, cipher.Length);
-					text = BitConverter.ToString(decryptedBytes);
+					text = Encoding.UTF8.GetString(decryptedBytes);
 				}
             }
 

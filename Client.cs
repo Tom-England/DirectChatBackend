@@ -226,7 +226,8 @@ namespace Network{
 				if (data.created && data.status == Status.message) {
 					Console.WriteLine("Recieved: {0}", data.text);
 					if (!dbh.user_exists(data.sender_id)){
-						dbh.add_user("New User", data.sender_id);
+						User.UserTransferable user_info = request_user(data.sender_id, c.client);
+						dbh.add_user(user_info.name, user_info.id, user_info.key);
 					}
 					string data_text = Convert.ToBase64String(data.text);
 					dbh.add_message(data_text, data.sender_id);
@@ -255,7 +256,7 @@ namespace Network{
 
 		public void handshake(TcpClient c, User u, cryptography.CryptoHelper crypto){
 			send_status(Status.handshake, c, u.Id);
-			User.UserTransferable user = new User.UserTransferable(u.Name, u.Id, crypto.AES.Key, crypto.AES.IV);
+			User.UserTransferable user = new User.UserTransferable(u.Name, u.Id, crypto.public_key, crypto.AES.IV);
 			user.created = true;
 			send_user(user, u, c);
 			Console.WriteLine("Handshake Done");
@@ -297,9 +298,11 @@ namespace Network{
 			User.UserTransferable uT = request_user(guid, c.client);
 			//crypto.AES.Key = crypto.create_shared_secret(uT.key);
 
-			//crypto.print_keys();
+			crypto.print_keys();
 			
 			byte[] key = crypto.generate_shared_secret(crypto.private_key, uT.key);
+
+			//Console.WriteLine("Shared Secret: {0}", BitConverter.ToString(key));
 
 			while (msg != "quit"){
 

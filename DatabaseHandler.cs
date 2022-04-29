@@ -23,6 +23,7 @@ namespace Storage
 			string users = @"CREATE TABLE if not exists users
 			(
 				user_id VARCHAR(40) PRIMARY KEY NOT NULL,
+				user_key, CHAR(32);
 				user_name VARCHAR(20)
 			);";
 
@@ -116,9 +117,10 @@ namespace Storage
 			}
 			return false;
 		}
-		public void add_user(string username, Guid id){
+		public void add_user(string username, Guid id, byte[] key){
+			string s_key = Convert.ToBase64String(key);
 			string s_id = id.ToString();
-			string sql = "INSERT INTO users(user_id, user_name) VALUES ('"+s_id+"', '"+username+"')";
+			string sql = "INSERT INTO users(user_id, user_name, user_key) VALUES ('"+s_id+"', '"+username+"', '"+s_key+"')";
 			run_command(sql);
 		}
 
