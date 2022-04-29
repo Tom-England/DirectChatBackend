@@ -23,7 +23,7 @@ namespace Storage
 			string users = @"CREATE TABLE if not exists users
 			(
 				user_id VARCHAR(40) PRIMARY KEY NOT NULL,
-				user_key, CHAR(32);
+				user_key CHAR(32),
 				user_name VARCHAR(20)
 			);";
 
