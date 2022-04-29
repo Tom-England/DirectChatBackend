@@ -103,10 +103,11 @@ namespace Network{
 			MessageHandler mh = new MessageHandler();
 			Byte[] data = mh.get_bytes(m);
 			Console.WriteLine("Sending {0} bytes", data.Length);
+			Console.WriteLine("Trying to send {0}", m.status);
 			while (!acked) {
 				NetworkStream str = c.GetStream();
 				str.Write(data, 0, data.Length);
-				//Console.WriteLine("Sent: {0}", m.status);
+				Console.WriteLine("Sent: {0}", m.status);
 
 				data = new Byte[Constants.MESSAGE_STRUCT_SIZE];
 				Message responseData;
@@ -126,6 +127,7 @@ namespace Network{
 			MessageHandler mh = new MessageHandler();
 			Byte[] data = mh.get_bytes(m);
 			Console.WriteLine("Sending {0} bytes", data.Length);
+			Console.WriteLine("Trying to send {0}", m.status);
 			while (!acked) {
 				stream.Write(data, 0, data.Length);
 				Console.WriteLine("Sent Status: {0}", m.status);
@@ -209,6 +211,9 @@ namespace Network{
 		}
 
 		public void check_messages(Client c, Guid id){
+
+			LinkedList<Message> received_stack = new LinkedList<Message>();
+
 			Console.WriteLine("Checking for messages");
 			// 1. Send message to mm asking for messages
 			send_status(Status.recieve, Constants.IP, c.client, id);
@@ -224,13 +229,7 @@ namespace Network{
 			while (data.status != Status.done) {
 				Console.WriteLine("Received {0}", data.status);
 				if (data.created && data.status == Status.message) {
-					Console.WriteLine("Recieved: {0}", data.text);
-					if (!dbh.user_exists(data.sender_id)){
-						User.UserTransferable user_info = request_user(data.sender_id, c.client);
-						dbh.add_user(user_info.name, user_info.id, user_info.key);
-					}
-					string data_text = Convert.ToBase64String(data.text);
-					dbh.add_message(data_text, data.sender_id);
+					received_stack.AddLast(data);
 				}
 				data = read_message_from_stream(c);
 			}
@@ -238,6 +237,15 @@ namespace Network{
 			//Console.WriteLine("Done");
 			send_status(Status.ack, c.client, id, false);
 
+			// Handle Users
+			foreach (Message message in received_stack){
+				if (!dbh.user_exists(data.sender_id)){
+						User.UserTransferable user_info = request_user(data.sender_id, c.client);
+						dbh.add_user(user_info.name, user_info.id, user_info.key);
+					}
+				string data_text = Convert.ToBase64String(data.text);
+				dbh.add_message(data_text, data.sender_id);
+			}
 		}
 
 		void setup_id(User u, cryptography.CryptoHelper c){
