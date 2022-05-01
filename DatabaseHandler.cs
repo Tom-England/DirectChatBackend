@@ -1,13 +1,16 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Data.Sqlite;
 
 namespace Storage
 {
-	class DatabaseHandler{
-		string db_connection_str = "Data Source=data.db";
+	public class DatabaseHandler{
+		string folder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
+		string db_connection_str;
 		SqliteConnection db_connection;
 
 		public void create(){
+			db_connection_str = "Data Source=" + folder + "data.db";
 			db_connection = new SqliteConnection(db_connection_str);
 		}
 		public void setup(){
@@ -40,6 +43,7 @@ namespace Storage
 		}
 
 		public void connect(){
+			db_connection_str = "Data Source=" + folder + "/data.db";
 			db_connection = new SqliteConnection(db_connection_str);
 			db_connection.Open();
 		}
@@ -130,14 +134,16 @@ namespace Storage
 			run_command(sql);
 		}
 
-		public void get_all_users(){
-
-			string sql = "select * from users";
+		public List<Network.User.UserTransferable> get_all_users(){
+            List<Network.User.UserTransferable> users = new List<Network.User.UserTransferable>();
+            string sql = "select * from users";
 			SqliteDataReader reader = run_reader(sql);
 			while (reader.Read()){
 				Console.WriteLine("Name: " + reader["user_name"] + "\tID: " + reader["user_id"]);
-			}
-		}
+                users.Add(new Network.User.UserTransferable(reader["user_name"].ToString(), Guid.Parse(reader["user_id"].ToString()), new byte[32], new byte[16]));
+            }
+            return users;
+        }
 
 		public void print_all_messages(byte[] key, byte[] iv){
 			string sql = "SELECT message_text, sender_id FROM messages;";

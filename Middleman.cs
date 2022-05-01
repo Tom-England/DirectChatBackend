@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -96,7 +99,6 @@ namespace Network{
 			//Console.WriteLine("client ip: {0}", get_ip(clients[0]));
 			//Console.WriteLine("client ip: {0}", get_ip(clients[1]));
             //clients.Add(listener.get_client());
-			Message m;
 			listener.start_server();
 			List<Thread> threads = new List<Thread>();
 			while (running) {

@@ -1,8 +1,9 @@
 using System.Net;
+using System;
 using System.Runtime.InteropServices; // For converting the message to a byte array
 
 namespace Network{
-    struct Message{
+    public struct Message{
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 176)]
         public byte[] text;

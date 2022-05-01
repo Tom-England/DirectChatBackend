@@ -3,7 +3,7 @@ using System.Net;
 using System.Runtime.InteropServices; // For converting the message to a byte array
 
 namespace Network{
-	class User{
+	public class User{
 		private string name;
 		public string Name
 		{

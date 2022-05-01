@@ -1,3 +1,5 @@
+using System;
+
 namespace Tests
 {
 	class Test{

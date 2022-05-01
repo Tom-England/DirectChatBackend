@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -18,9 +19,9 @@ namespace Network{
 		void check_messages(Client c, Guid id);
 		void run_client();
 	}
-    class Client:IClient{
+    public class Client:IClient{
 
-        Storage.DatabaseHandler dbh = new Storage.DatabaseHandler();
+        public Storage.DatabaseHandler dbh = new Storage.DatabaseHandler();
         TcpClient client;
 		NetworkStream stream;
 		bool send_ready = false;
@@ -250,7 +251,7 @@ namespace Network{
 			}
 		}
 
-		void setup_id(User u, cryptography.CryptoHelper c){
+		public void setup_id(User u, cryptography.CryptoHelper c){
 			Guid temp_id = dbh.get_account_id();	
 			if (temp_id != Guid.Empty) {
 				c.AES.IV = dbh.get_iv();
@@ -283,6 +284,11 @@ namespace Network{
 			send_status(Status.ack, c, target, false);
 			//Console.WriteLine(BitConverter.ToString(details.key));
 			return details;
+		}
+
+		public void setup_client() {
+			dbh.connect();
+			dbh.setup();
 		}
 
         public void run_client(){

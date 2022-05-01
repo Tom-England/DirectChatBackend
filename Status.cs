@@ -1,5 +1,5 @@
 namespace Network{
-	enum Status{
+	public enum Status{
 		handshake,
 		send,
 		recieve,

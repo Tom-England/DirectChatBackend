@@ -1,9 +1,10 @@
 using System.Security.Cryptography;
 using Elliptic;
 using System.Text;
+using System;
 
 namespace cryptography{
-	class CryptoHelper{
+	public class CryptoHelper{
 		
 		public byte[] bytes;
 		public byte[] private_key;
