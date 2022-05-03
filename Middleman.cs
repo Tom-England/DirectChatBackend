@@ -32,63 +32,78 @@ namespace Network{
 			TcpClient c = (TcpClient) c_obj;
 			Guid id = Guid.Empty;
 			while (true) {
-				Message m = listener.get_message(c);
-				switch (m.status){
-					case Status.request:
-						Console.WriteLine("request for {0}", m.sender_id);
-						User.UserTransferable uT = new User.UserTransferable();
-						foreach (User.UserTransferable userT in user_stack){
-							if (userT.id == m.sender_id) {
-								uT = userT;
+                try
+                {
+					Message m = listener.get_message(c);
+					switch (m.status)
+					{
+						case Status.request:
+							Console.WriteLine("request for {0}", m.sender_id);
+							User.UserTransferable uT = new User.UserTransferable();
+							foreach (User.UserTransferable userT in user_stack)
+							{
+								if (userT.id == m.sender_id)
+								{
+									uT = userT;
+								}
 							}
-						}
-						mm_client.send_user(uT, u, c);
-						break;
-					case Status.handshake:
-						mm_client.send_status(Status.ack, c, u.Id, false);
-						User.UserTransferable usr = listener.get_user(c);
-						while (!usr.created) {
-							usr = listener.get_user(c);
-						}
-						user_stack.AddLast(usr);
-						Console.WriteLine("Hello {0}: {1}", usr.name, usr.id);
-						mm_client.send_status(Status.ack, c, u.Id, false);
-						id = usr.id;
-						break;
-					case Status.message:
-						//Console.WriteLine("Message");
-						Console.WriteLine("Recieved: {0}", m.text);
-						message_stack.AddLast(m);
-						mm_client.send_status(Status.ack, c, u.Id, false);
-						break;
-					case Status.send:
-						//Console.WriteLine("Send");
-						mm_client.send_status(Status.ack, c, u.Id, false);
-						break;
-					case Status.recieve:
-						Console.WriteLine("Recieve");
-						mm_client.send_status(Status.ack, c, u.Id, false);
+							mm_client.send_user(uT, u, c);
+							break;
+						case Status.handshake:
+							mm_client.send_status(Status.ack, c, u.Id, false);
+							User.UserTransferable usr = listener.get_user(c);
+							while (!usr.created)
+							{
+								usr = listener.get_user(c);
+							}
+							user_stack.AddLast(usr);
+							Console.WriteLine("Hello {0}: {1}", usr.name, usr.id);
+							mm_client.send_status(Status.ack, c, u.Id, false);
+							id = usr.id;
+							break;
+						case Status.message:
+							//Console.WriteLine("Message");
+							Console.WriteLine("Recieved: {0}", m.text);
+							message_stack.AddLast(m);
+							mm_client.send_status(Status.ack, c, u.Id, false);
+							break;
+						case Status.send:
+							//Console.WriteLine("Send");
+							mm_client.send_status(Status.ack, c, u.Id, false);
+							break;
+						case Status.recieve:
+							Console.WriteLine("Recieve");
+							mm_client.send_status(Status.ack, c, u.Id, false);
 
-						LinkedListNode<Message> node=message_stack.First;
-						Message message;
-						while(node != null){
-							message = node.Value;
-							LinkedListNode<Message> next = node.Next;
-							if (id == message.destination) {
-								// Message is to be sent
-								Console.WriteLine("Sending Message with status {0}", message.status);
-								Console.WriteLine("c: {0}", message.sender_id);
-								mm_client.send(message, c);
-								message_stack.Remove(node);
-							} else {
-								Console.WriteLine("{0} != {1}", id, message.destination.ToString());
+							LinkedListNode<Message> node = message_stack.First;
+							Message message;
+							while (node != null)
+							{
+								message = node.Value;
+								LinkedListNode<Message> next = node.Next;
+								if (id == message.destination)
+								{
+									// Message is to be sent
+									Console.WriteLine("Sending Message with status {0}", message.status);
+									Console.WriteLine("c: {0}", message.sender_id);
+									mm_client.send(message, c);
+									message_stack.Remove(node);
+								}
+								else
+								{
+									Console.WriteLine("{0} != {1}", id, message.destination.ToString());
+								}
+								node = next;
 							}
-							node = next;
-						}
-						mm_client.send_status(Status.done, c, u.Id);
-						Console.WriteLine("Done Recieve");
-						break;
-				}
+							mm_client.send_status(Status.done, c, u.Id);
+							Console.WriteLine("Done Recieve");
+							break;
+					}
+				} catch (System.IO.IOException e)
+                {
+					Console.WriteLine("Client Write Failed, closing client...");
+					break;
+                }
 			}
 			
 		}
