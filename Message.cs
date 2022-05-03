@@ -7,20 +7,19 @@ namespace Network{
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 176)]
         public byte[] text;
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = Constants.IP_SIZE)]
-        public String destination;
+        public Guid destination;
         public bool sent;
 		public Status status = Status.none;
 		public bool created = false;
 		public Guid sender_id;	
-		public Message(String _dest, Status _status, Guid _id){
+		public Message(Guid _dest, Status _status, Guid _id){
 			destination = _dest;
 			status = _status;
 			sent = false;
 			text = new byte[176];
 			sender_id = _id;
 		}
-        public Message(byte[] _text, String _dest, Guid _id){
+        public Message(byte[] _text, Guid _dest, Guid _id){
             text = _text;
             destination = _dest;
             sent = false;

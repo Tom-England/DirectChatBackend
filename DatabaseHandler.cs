@@ -147,7 +147,6 @@ namespace Storage
 			string sql = "INSERT INTO messages(message_text, sender_id) VALUES ('"+message+"', '"+s_id+"')";
 			run_command(sql);
 		}
-
 		public List<Network.User.UserTransferable> get_all_users(){
             List<Network.User.UserTransferable> users = new List<Network.User.UserTransferable>();
             string sql = "select * from users";
@@ -182,7 +181,7 @@ namespace Storage
 			while (reader.Read()){
 				Console.WriteLine(id + " : " + reader["message_text"]);
 				byte[] msg = Convert.FromBase64String(reader["message_text"].ToString());
-				messages.Add(new Network.Message(msg, "0.0.0.0", Guid.Parse(reader["sender_id"].ToString())));
+				messages.Add(new Network.Message(msg, Guid.Empty, Guid.Parse(reader["sender_id"].ToString())));
 			}
 			return messages;
 		}

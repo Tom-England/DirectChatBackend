@@ -30,6 +30,7 @@ namespace Network{
 
 		void handle_client(Object c_obj){
 			TcpClient c = (TcpClient) c_obj;
+			Guid id = Guid.Empty;
 			while (true) {
 				Message m = listener.get_message(c);
 				switch (m.status){
@@ -52,6 +53,7 @@ namespace Network{
 						user_stack.AddLast(usr);
 						Console.WriteLine("Hello {0}: {1}", usr.name, usr.id);
 						mm_client.send_status(Status.ack, c, u.Id, false);
+						id = usr.id;
 						break;
 					case Status.message:
 						//Console.WriteLine("Message");
@@ -72,14 +74,14 @@ namespace Network{
 						while(node != null){
 							message = node.Value;
 							LinkedListNode<Message> next = node.Next;
-							if (get_ip(c) == message.destination) {
+							if (id == message.destination) {
 								// Message is to be sent
 								Console.WriteLine("Sending Message with status {0}", message.status);
 								Console.WriteLine("c: {0}", message.sender_id);
 								mm_client.send(message, c);
 								message_stack.Remove(node);
 							} else {
-								Console.WriteLine("{0} != {1}", get_ip(c), message.destination);
+								Console.WriteLine("{0} != {1}", id, message.destination.ToString());
 							}
 							node = next;
 						}
@@ -106,7 +108,7 @@ namespace Network{
 					// Start thread
 					threads.Add(new Thread(handle_client));
 					threads.Last().Start(clients.Last());
-					Console.WriteLine("Connected: {0} : {1}", get_ip(clients.Last()));
+					//Console.WriteLine("Connected: {0} : {1}", get_ip(clients.Last()));
 				}
 				/*
 				List<int> dead_client_indexes = new List<int>(); // Dead Client Indexes could be a good band name?

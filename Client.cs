@@ -10,9 +10,9 @@ namespace Network{
 	interface IClient{
 		void create_client(String server);
 		void close_client();
-		void send(byte[] message, String dest, Guid _id);
+		void send(byte[] message, Guid dest, Guid _id);
 		void send(Message m, TcpClient c);
-		void send_status(Status s, String dest, TcpClient c, Guid id);
+		void send_status(Status s, Guid dest, TcpClient c, Guid id);
 		void send_status(Status s, TcpClient c, Guid id, bool ack_needed = true);
 		Message read_message_from_stream(Client c);
 		Message read_message_from_stream(NetworkStream s);
@@ -67,7 +67,7 @@ namespace Network{
 				Thread.Sleep(100);
 			}
 		}
-        public void send(byte[] message, String dest, Guid _id){
+        public void send(byte[] message, Guid dest, Guid _id){
             bool acked = false;
 
             Message m = new Message(message, dest, _id);
@@ -98,12 +98,12 @@ namespace Network{
 			//stream.Dispose();
         }
 
-		public void send_status(Status s, String dest, TcpClient c, Guid id){
+		public void send_status(Status s, Guid dest, TcpClient c, Guid id){
 			bool acked = false;
 			Message m = new Message(dest, s, id);
 			MessageHandler mh = new MessageHandler();
 			Byte[] data = mh.get_bytes(m);
-			//Console.WriteLine("Sending {0} bytes", data.Length);
+			Console.WriteLine("Sending {0} bytes", data.Length);
 			//Console.WriteLine("Trying to send {0}", m.status);
 			while (!acked) {
 				NetworkStream str = c.GetStream();
@@ -124,7 +124,7 @@ namespace Network{
 		public void send_status(Status s, TcpClient c, Guid id, bool ack_needed = true ){
 			NetworkStream stream = c.GetStream();
 			bool acked = false;
-			Message m = new Message("-1", s, id);
+			Message m = new Message(Guid.Empty, s, id);
 			MessageHandler mh = new MessageHandler();
 			Byte[] data = mh.get_bytes(m);
 			//Console.WriteLine("Sending {0} bytes", data.Length);
@@ -217,7 +217,7 @@ namespace Network{
 
 			Console.WriteLine("Checking for messages");
 			// 1. Send message to mm asking for messages
-			send_status(Status.recieve, Constants.IP, c.client, id);
+			send_status(Status.recieve, Guid.Empty, c.client, id);
 			//Console.WriteLine("Status Sent");
 			// 2. Await ACK
 			//Console.WriteLine("Checking for ACK");
@@ -275,7 +275,7 @@ namespace Network{
 
 		public User.UserTransferable request_user(Guid target, TcpClient c){
 			User.UserTransferable details;
-			Message m = new Message("0.0.0.0", Status.request, target);
+			Message m = new Message(Guid.Empty, Status.request, target);
 			send(m, c);
 			Listener l = new Listener();
 			do{
@@ -292,7 +292,7 @@ namespace Network{
 		}
 
         public void run_client(){
-            User u = new User("user");
+            User u = new User("Jerry Seinfeld");
 			Client c = new Client();
 
 			cryptography.CryptoHelper crypto = new cryptography.CryptoHelper();
@@ -305,8 +305,6 @@ namespace Network{
 			handshake(c.client, u, crypto);
 
             string msg = "";
-			Console.Write("Target >>> ");
-			string target = Console.ReadLine();
 			Console.Write("Target Guid >>> ");
 			Guid guid = Guid.Parse(Console.ReadLine());
 			Console.WriteLine();
@@ -353,12 +351,12 @@ namespace Network{
 					if (split){
 						foreach(string str in msg_segments){
 							byte[] enc_str = crypto.encrypt(str.PadRight(Constants.MESSAGE_SIZE), key, uT.iv);
-							c.send(enc_str, target, u.Id);
+							c.send(enc_str, guid, u.Id);
 						}
 					} else {
 						byte[] enc_str = crypto.encrypt(msg.PadRight(Constants.MESSAGE_SIZE), key, uT.iv);
 						Console.WriteLine("Length of msg: {0}", enc_str.Length);
-						c.send(enc_str, target, u.Id);
+						c.send(enc_str, guid, u.Id);
 					}
 				//}
 				//else { break; }
