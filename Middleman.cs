@@ -50,7 +50,7 @@ namespace Network{
 							usr = listener.get_user(c);
 						}
 						user_stack.AddLast(usr);
-						Console.WriteLine("Hello {0}", usr.name);
+						Console.WriteLine("Hello {0}: {1}", usr.name, usr.id);
 						mm_client.send_status(Status.ack, c, u.Id, false);
 						break;
 					case Status.message:
@@ -106,7 +106,7 @@ namespace Network{
 					// Start thread
 					threads.Add(new Thread(handle_client));
 					threads.Last().Start(clients.Last());
-					Console.WriteLine("Connected: {0}", get_ip(clients.Last()));
+					Console.WriteLine("Connected: {0} : {1}", get_ip(clients.Last()));
 				}
 				/*
 				List<int> dead_client_indexes = new List<int>(); // Dead Client Indexes could be a good band name?

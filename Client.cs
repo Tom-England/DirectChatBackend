@@ -22,7 +22,7 @@ namespace Network{
     public class Client:IClient{
 
         public Storage.DatabaseHandler dbh = new Storage.DatabaseHandler();
-        TcpClient client;
+        public TcpClient client;
 		NetworkStream stream;
 		bool send_ready = false;
 		Status status;
@@ -103,12 +103,12 @@ namespace Network{
 			Message m = new Message(dest, s, id);
 			MessageHandler mh = new MessageHandler();
 			Byte[] data = mh.get_bytes(m);
-			Console.WriteLine("Sending {0} bytes", data.Length);
-			Console.WriteLine("Trying to send {0}", m.status);
+			//Console.WriteLine("Sending {0} bytes", data.Length);
+			//Console.WriteLine("Trying to send {0}", m.status);
 			while (!acked) {
 				NetworkStream str = c.GetStream();
 				str.Write(data, 0, data.Length);
-				Console.WriteLine("Sent: {0}", m.status);
+				//Console.WriteLine("Sent: {0}", m.status);
 
 				data = new Byte[Constants.MESSAGE_STRUCT_SIZE];
 				Message responseData;
@@ -127,11 +127,11 @@ namespace Network{
 			Message m = new Message("-1", s, id);
 			MessageHandler mh = new MessageHandler();
 			Byte[] data = mh.get_bytes(m);
-			Console.WriteLine("Sending {0} bytes", data.Length);
-			Console.WriteLine("Trying to send {0}", m.status);
+			//Console.WriteLine("Sending {0} bytes", data.Length);
+			//Console.WriteLine("Trying to send {0}", m.status);
 			while (!acked) {
 				stream.Write(data, 0, data.Length);
-				Console.WriteLine("Sent Status: {0}", m.status);
+				//Console.WriteLine("Sent Status: {0}", m.status);
 
 				if (!ack_needed) { acked = true; break; }
 				//Console.WriteLine("Waiting for ACK");

@@ -84,6 +84,20 @@ namespace Storage
 			}
 			return id;
 		}
+
+		public byte[] get_user_key(Guid id)
+		{
+			string sql = "SELECT user_key FROM users WHERE user_id='" + id.ToString() + "'";
+			byte[] key = new byte[32];
+			SqliteDataReader reader = run_reader(sql);
+			if (reader.HasRows) {
+				while (reader.Read())
+				{
+					key = Convert.FromBase64String(reader["user_key"].ToString());
+				}
+			}
+			return key;
+		}
 		public byte[] get_key(){
 			string sql = "SELECT key FROM account";
 			SqliteDataReader reader = run_reader(sql);
@@ -139,8 +153,10 @@ namespace Storage
             string sql = "select * from users";
 			SqliteDataReader reader = run_reader(sql);
 			while (reader.Read()){
-				Console.WriteLine("Name: " + reader["user_name"] + "\tID: " + reader["user_id"]);
-                users.Add(new Network.User.UserTransferable(reader["user_name"].ToString(), Guid.Parse(reader["user_id"].ToString()), new byte[32], new byte[16]));
+				string name = reader["user_name"].ToString();
+				Guid id = Guid.Parse(reader["user_id"].ToString());
+				Console.WriteLine("Name: " + name + "\tID: " + id.ToString());
+                users.Add(new Network.User.UserTransferable(name, id, new byte[32], new byte[16]));
             }
             return users;
         }
@@ -156,15 +172,19 @@ namespace Storage
 				Console.WriteLine("{0} : {1}", reader["sender_id"], text);
 			}
 		}
-		public void get_all_messages_from_user(Guid id){
+		public List<Network.Message> get_all_messages_from_user(Guid id){
 			string s_id = id.ToString();
 			string sql = "SELECT * FROM messages WHERE sender_id='"+s_id+"'";
 			SqliteCommand command = db_connection.CreateCommand();
 			command.CommandText = sql;
 			SqliteDataReader reader = command.ExecuteReader();
+			List<Network.Message> messages = new List<Network.Message>();
 			while (reader.Read()){
 				Console.WriteLine(id + " : " + reader["message_text"]);
+				byte[] msg = Convert.FromBase64String(reader["message_text"].ToString());
+				messages.Add(new Network.Message(msg, "0.0.0.0", Guid.Parse(reader["sender_id"].ToString())));
 			}
+			return messages;
 		}
 		
 		public bool check_if_setup(){
