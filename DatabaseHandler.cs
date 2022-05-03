@@ -20,9 +20,11 @@ namespace Storage
 				message_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 				message_text CHAR(" + Network.Constants.MESSAGE_SIZE + @") NOT NULL,
 				sender_id INT NOT NULL,
+				time INT,
+				sent TEXT,
 				FOREIGN KEY(sender_id) REFERENCES users(user_id)
 			);";
-			
+
 			string users = @"CREATE TABLE if not exists users
 			(
 				user_id VARCHAR(40) PRIMARY KEY NOT NULL,
@@ -141,10 +143,16 @@ namespace Storage
 			string sql = "INSERT INTO users(user_id, user_name, user_key) VALUES ('"+s_id+"', '"+username+"', '"+s_key+"')";
 			run_command(sql);
 		}
-
-		public void add_message(string message, Guid id){
+		public void add_message(string message, Guid id, bool sent=false){
 			string s_id = id.ToString();
-			string sql = "INSERT INTO messages(message_text, sender_id) VALUES ('"+message+"', '"+s_id+"')";
+			string sql;
+			if (sent) {
+				sql = "INSERT INTO messages(message_text, sender_id, time, sent) VALUES ('" + message + "', '" + s_id + "', strftime('%s', 'now'), 'true')";
+			} else
+            {
+				sql = "INSERT INTO messages(message_text, sender_id, time, sent) VALUES ('" + message + "', '" + s_id + "', strftime('%s', 'now'), 'false')";
+			}
+			
 			run_command(sql);
 		}
 		public List<Network.User.UserTransferable> get_all_users(){
@@ -185,7 +193,28 @@ namespace Storage
 			}
 			return messages;
 		}
-		
+
+		public List<Network.Message> get_all_messages_user(Guid id)
+		{
+			string s_id = id.ToString();
+			string sql = "SELECT * FROM messages WHERE sender_id='" + s_id + "' ORDER BY time ASC";
+			SqliteCommand command = db_connection.CreateCommand();
+			command.CommandText = sql;
+			SqliteDataReader reader = command.ExecuteReader();
+			List<Network.Message> messages = new List<Network.Message>();
+			while (reader.Read())
+			{
+				Console.WriteLine(id + " : " + reader["message_text"]);
+				byte[] msg = Convert.FromBase64String(reader["message_text"].ToString());
+				Network.Message m = new Network.Message(msg, Guid.Parse(reader["sender_id"].ToString()), Guid.Parse(reader["sender_id"].ToString()));
+				if ((string)reader["sent"] == "true") { m.sent = true; }
+				messages.Add(m);
+			}
+			return messages;
+		}
+
+
+
 		public bool check_if_setup(){
 			string sql = "SELECT COUNT(object_id) FROM sys.tables WHERE name = 'users';";
 			SqliteDataReader reader = run_reader(sql);
