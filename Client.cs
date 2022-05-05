@@ -16,7 +16,7 @@ namespace Network{
 		void send_status(Status s, TcpClient c, Guid id, bool ack_needed = true);
 		Message read_message_from_stream(Client c);
 		Message read_message_from_stream(NetworkStream s);
-		void check_messages(Client c, Guid id);
+		(bool, bool) check_messages(Client c, Guid id);
 		void run_client();
 	}
     public class Client:IClient{
@@ -211,7 +211,10 @@ namespace Network{
 			return data;
 		}
 
-		public void check_messages(Client c, Guid id){
+		public (bool, bool) check_messages(Client c, Guid id){
+
+			bool user_added = false;
+			bool message_added = false;
 
 			LinkedList<Message> received_stack = new LinkedList<Message>();
 
@@ -240,15 +243,19 @@ namespace Network{
 
 			// Handle Users
 			foreach (Message message in received_stack){
+				message_added = true;
 				if (!dbh.user_exists(message.sender_id)){
 						Console.WriteLine("Requesting: {0}", message.sender_id);
 						User.UserTransferable user_info = request_user(message.sender_id, c.client);
 						Console.WriteLine("{0} {1}", user_info.id, user_info.name);
 						dbh.add_user(user_info.name, message.sender_id, user_info.key);
+						user_added = true;
 					}
 				string data_text = Convert.ToBase64String(message.text);
 				dbh.add_message(data_text, message.sender_id);
 			}
+
+			return (user_added, message_added);
 		}
 
 		public void setup_id(User u, cryptography.CryptoHelper c){
