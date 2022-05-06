@@ -105,18 +105,19 @@ namespace Network{
 			Byte[] data = mh.get_bytes(m);
 			Console.WriteLine("Sending {0} bytes", data.Length);
 			//Console.WriteLine("Trying to send {0}", m.status);
+			
 			while (!acked) {
 				NetworkStream str = c.GetStream();
 				str.Write(data, 0, data.Length);
-				//Console.WriteLine("Sent: {0}", m.status);
+				Console.WriteLine("Sent: {0}", m.status);
 
-				data = new Byte[Constants.MESSAGE_STRUCT_SIZE];
-				Message responseData;
+				byte[] response_data = new byte[Constants.MESSAGE_STRUCT_SIZE];
+				Message response;
 
-				Int32 bytes = str.Read(data, 0, data.Length);
-                responseData = mh.from_bytes(data);
+				Int32 bytes = str.Read(response_data, 0, response_data.Length);
+                response = mh.from_bytes(response_data);
                 //Console.WriteLine("Received: {0}", responseData.status);
-                if (responseData.status == Status.ack) { acked = true; }
+                if (response.status == Status.ack) { acked = true; }
 				Thread.Sleep(100);
 			}
 		}
@@ -129,20 +130,22 @@ namespace Network{
 			Byte[] data = mh.get_bytes(m);
 			//Console.WriteLine("Sending {0} bytes", data.Length);
 			//Console.WriteLine("Trying to send {0}", m.status);
+			byte[] response_data;
 			while (!acked) {
 				stream.Write(data, 0, data.Length);
-				//Console.WriteLine("Sent Status: {0}", m.status);
+				Console.WriteLine("Sent Status: {0}", m.status);
 
 				if (!ack_needed) { acked = true; break; }
 				//Console.WriteLine("Waiting for ACK");
 				
-				//data = new Byte[Constants.MESSAGE_STRUCT_SIZE];
-				Message responseData = read_message_from_stream(stream);
+				response_data = new byte[Constants.MESSAGE_STRUCT_SIZE];
+				Message response;
+				//Message responseData = read_message_from_stream(stream);
 
-				//Int32 bytes = stream.Read(data, 0, data.Length);
-                //responseData = mh.from_bytes(data);
+				Int32 bytes = stream.Read(response_data, 0, data.Length);
+                response = mh.from_bytes(response_data);
                 //Console.WriteLine("Received: {0}", responseData.status);
-                if (responseData.status == Status.ack) { acked = true; }
+                if (response.status == Status.ack) { acked = true; }
 				Thread.Sleep(100);
 			}
 		}

@@ -72,13 +72,15 @@ namespace Network{
 							mm_client.send_status(Status.ack, c, u.Id, false);
 							break;
 						case Status.recieve:
-							Console.WriteLine("Recieve");
+							Console.WriteLine("{0} {1} Recieve", DateTimeOffset.Now.ToUnixTimeSeconds(), id);
 							mm_client.send_status(Status.ack, c, u.Id, false);
 
 							LinkedListNode<Message> node = message_stack.First;
 							Message message;
+							Console.WriteLine("{0} nodes", message_stack.Count);
 							while (node != null)
 							{
+								
 								message = node.Value;
 								LinkedListNode<Message> next = node.Next;
 								if (id == message.destination)
@@ -99,6 +101,7 @@ namespace Network{
 							Console.WriteLine("Done Recieve");
 							break;
 					}
+					Thread.Sleep(0);
 				} catch (System.IO.IOException e)
                 {
 					Console.WriteLine("Client Write Failed, closing client...");
@@ -124,6 +127,11 @@ namespace Network{
 					threads.Add(new Thread(handle_client));
 					threads.Last().Start(clients.Last());
 					//Console.WriteLine("Connected: {0} : {1}", get_ip(clients.Last()));
+				}
+				foreach (Thread t in threads) {
+					if (!t.IsAlive) {
+						t.Join();
+					}
 				}
 				/*
 				List<int> dead_client_indexes = new List<int>(); // Dead Client Indexes could be a good band name?
